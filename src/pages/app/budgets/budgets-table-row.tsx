@@ -10,80 +10,66 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteBudgets } from "@/api/delete-budgets";
 import { DespesaResponse } from "@/api/get-budgets";
-import { editBudgets } from "@/api/edit-status-budgets";
+import { editBudgets, EditBudgetsParams } from "@/api/edit-budgets";
+import { EditBudgetsModal } from "@/components/edit-budgets";
+
+export interface Despesa {
+    id: string;
+    name: string;
+    data: string | null;
+    valor: number;
+    status: 'vencido' | 'pago' | 'normal' | 'pendente';
+    dataVencimento: string | null;
+    createdAt: Date;
+    updatedAt: Date | null | undefined;
+    userId: string;
+}
 
 export interface DespesaTableRowProps {
-    despesa: {
-        id: string;
-        name: string;
-        data: Date | null;
-        valor: number;
-        status: 'vencido' | 'pago' | 'normal' | 'pendente';
-        dataVencimento: Date | null;
-        createdAt: Date;
-        updatedAt: Date | null | undefined;
-        userId: string;
-    }
+    despesa: Despesa;
 }
 
 export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-    const queryClient = useQueryClient()
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const queryClient = useQueryClient();
 
     const { mutateAsync: deleteBudgetsFn } = useMutation({
         mutationFn: deleteBudgets,
-        onSuccess(_, { budgetsId }) {
-          const cached = queryClient.getQueriesData<DespesaResponse>({
-            queryKey: ['budgets'] 
-          });
-      
-          cached.forEach(([cachedKey, cachedData]) => {
-            if (!cachedData) {
-              return;
-            }
-            window.location.reload();
-            
-            queryClient.setQueryData<DespesaResponse>(cachedKey, {
-              ...cachedData,
-              value: {
-                ...cachedData.value,
-                despesas: cachedData.value.despesas.filter(despesa => despesa.id !== budgetsId),
-              },
+        onSuccess: (_, { budgetsId }) => {
+            queryClient.setQueryData<DespesaResponse>(['budgets'], old => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    value: {
+                        ...old.value,
+                        despesas: old.value.despesas.filter(despesa => despesa.id !== budgetsId)
+                    }
+                };
             });
-          });
         },
-      });
+    });
 
     const { mutateAsync: editBudgetsFn } = useMutation({
         mutationFn: editBudgets,
-        onSuccess(_, { budgetsId }) {
-          const cached = queryClient.getQueriesData<DespesaResponse>({
-            queryKey: ['budgets'] 
-          });
-      
-          cached.forEach(([cachedKey, cachedData]) => {
-            if (!cachedData) {
-              return;
-            }
-            window.location.reload();
-            
-            queryClient.setQueryData<DespesaResponse>(cachedKey, {
-              ...cachedData,
-              value: {
-                ...cachedData.value,
-                despesas: cachedData.value.despesas.map((despesa) => {
-                    if (despesa.id === budgetsId) {
-                        return { ...despesa }
+        onSuccess: (_, { budgetsId, status, data, name, valor, dataVencimento }) => {
+            queryClient.setQueryData<EditBudgetsParams>(['budgets'], old => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    value: {
+                        ...old,
+                        budgetsId,
+                        name,
+                        valor,
+                        status,
+                        dataVencimento,
+                        data
                     }
-
-                    return despesa
-                })
-              },
+                };
             });
-          });
         },
-      });
-
+    });
 
     return (
         <>
@@ -99,13 +85,12 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
                         <BusgetsDetails open={isDetailsOpen} budgetsId={despesa.id} />
                     </Dialog>
                 </TableCell>
-                {/* <TableCell className="font-mono text-xs font-medium">{budget.id}</TableCell> */}
                 <TableCell className="font-medium">{despesa.name}</TableCell>
                 <TableCell className="font-medium">{`R$ ${despesa.valor.toLocaleString('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
                 })}`}</TableCell>
-                <TableCell className="font-medium">{despesa.dataVencimento ? format((despesa.dataVencimento), 'dd/MM/yyyy') : '-'}</TableCell>
+                <TableCell className="font-medium">{despesa.dataVencimento ? format(new Date(despesa.dataVencimento), 'dd/MM/yyyy') : '-'}</TableCell>
                 <TableCell>
                     <div className="flex items-center gap-2">
                         <span className="font-medium text-muted-foreground">
@@ -114,16 +99,21 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
                     </div>
                 </TableCell>
                 <TableCell>
-                    <Button onClick={() => editBudgetsFn({ budgetsId: despesa.id })} variant="ghost" size="xs">
+                    <Button onClick={() => editBudgetsFn({ budgetsId: despesa.id, status: 'pago' })} variant="ghost" size="xs">
                         <Check className="mr-2 h-3 w-3 fill-green-500"/>
                         Informar pagamento
                     </Button>
                 </TableCell>
                 <TableCell>
-                    <Button variant="ghost" size="xs">
-                        <FilePenIcon className="mr-2 h-3 w-3"/>
-                        Editar
-                    </Button>
+                    <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                        <DialogTrigger asChild>
+                            <Button onClick={() => setIsEditOpen} variant="ghost" size="xs">
+                                <FilePenIcon className="mr-2 h-3 w-3"/>
+                                Editar
+                            </Button>
+                        </DialogTrigger>
+                        <EditBudgetsModal onClose={() => setIsEditOpen(false)} open={isEditOpen} budgetsId={despesa.id}/>
+                    </Dialog>
                 </TableCell>
                 <TableCell>
                     <Button onClick={() => deleteBudgetsFn({ budgetsId: despesa.id })} disabled={!['vencido', 'normal', 'pendente'].includes(despesa.status)} variant="ghost" size="xs">

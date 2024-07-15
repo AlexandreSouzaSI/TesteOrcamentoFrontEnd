@@ -8,7 +8,7 @@ export interface GetIncomeDetailsResponse {
     renda: {
         id: string;
         name: string;
-        data: Date | null | undefined;
+        data: string | null | undefined;
         valor: number;
         status: 'vencido' | 'pago' | 'normal' | 'pendente';
         createdAt: Date;

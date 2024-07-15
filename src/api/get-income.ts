@@ -9,7 +9,7 @@ export interface GetIncomeQuery {
 interface Renda {
     id: string;
     name: string;
-    data: Date | null;
+    data: string | null;
     valor: number;
     status: 'vencido' | 'pago' | 'normal' | 'pendente';
     createdAt: Date;

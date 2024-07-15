@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
@@ -6,81 +6,111 @@ import { Label } from "./ui/label";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { registerBudgets } from "@/api/register-budgets";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getIncomeDetails } from "@/api/get-income-details";
+import { editIncome } from "@/api/edit-income";
 
-const budgetsBodyForm = z.object({
-    name: z.string(),
-    valor: z.coerce.number(),
-    status: z.string().optional(),
-    userId: z.string()
-});
-
-type BudgetsBodySchema = z.infer<typeof budgetsBodyForm>;
-
-export interface RegisterBudgetsModalProps {
-    onClose: () => void;
+interface incomeBodyResponse {
+    incomeId: string
+    name?: string,
+    valor?: number,
+    status?: string,
 }
 
-export function RegisterBudgetsModal({ onClose }: RegisterBudgetsModalProps) {
-    const { register, handleSubmit, formState: { isSubmitting }, control } = useForm<BudgetsBodySchema>();
-    const queryClient = useQueryClient();
+const incomeBodyForm = z.object({
+    incomeId: z.string(),
+    name: z.string().optional(),
+    valor: z.coerce.number().optional(),
+    status: z.string().optional(),
+})
 
-    const { mutateAsync: registerBudgetsFn } = useMutation({
-        mutationFn: registerBudgets,
+type IncomeBodySchema = z.infer<typeof incomeBodyForm>
+
+export interface IncomeDetailsProps {
+    incomeId: string
+    open: boolean
+    onClose: () => void
+}
+
+export function EditIncomeModal({incomeId, open, onClose}: IncomeDetailsProps) {
+    const queryClient = useQueryClient()
+    const {data: result} = useQuery({
+        queryKey: ['income', incomeId],
+        queryFn: () => getIncomeDetails({ incomeId }),
+        enabled: open
+    })
+
+    if (!result) {
+        return null
+    }
+
+    const { register, handleSubmit, formState: { isSubmitting }, control } = useForm<IncomeBodySchema>({
+        resolver: zodResolver(incomeBodyForm),
+        defaultValues: {
+            incomeId: result.id,
+            name: result.name ?? '',
+            valor: result.valor ?? '',
+            status: result.status ?? '',
+        }
+    })
+
+    const { mutateAsync: updateIncomeFn } = useMutation({
+        mutationFn: editIncome,
         onSuccess: async () => {
-            toast.success('Despesa criada com sucesso');
-            await queryClient.invalidateQueries(['budgets']);
-            onClose();
+            toast.success('Renda atualizada com sucesso');
+            onClose()
+            await queryClient.invalidateQueries(['income', { incomeId }]);
         },
         onError: () => {
-            toast.error('Falha ao criar uma despesa. Tente novamente.');
+            toast.error('Falha ao atualizar a renda. Tente novamente.');
         }
-    });
+    })
 
-    async function handleRegisterBudgets(data: BudgetsBodySchema) {
+    async function handleUpdateIncome(data: IncomeBodySchema) {
         try {
-            await registerBudgetsFn({
+            await updateIncomeFn({
+                incomeId: data.incomeId,
                 name: data.name,
                 valor: data.valor,
                 status: data.status,
-            });
+            })
         } catch (error) {
-            // A mensagem de erro já está sendo tratada pelo onError do mutateAsync
+            toast.error('Falha ao atualizar a renda. Tente novamente.');
         }
     }
 
     return (
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Cadastrar Despesa</DialogTitle>
+                <DialogTitle>Editar Renda</DialogTitle>
                 <DialogDescription>
-                    Painel para adicionar uma despesa
+                    Painel para editar uma renda
                 </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit(handleRegisterBudgets)}>
+            <form onSubmit={handleSubmit(handleUpdateIncome)}>
                 <div className="space-y-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right" htmlFor="name">
                             Nome
                         </Label>
-                        <Input className="col-span-3" id="name" {...register('name')} />
+                        <Input className="col-span-3" id="name" {...register('name')}/>
                         
                         <Label className="text-right" htmlFor="valor">
                             Valor
                         </Label>
-                        <Input className="col-span-3" id="valor" {...register('valor')} />
-                        
+                        <Input className="col-span-3" id="valor" {...register('valor')}/>
+
                         <Label className="text-right" htmlFor="status">
                             Status
                         </Label>
                         <Controller 
                             name="status"
                             control={control}
-                            render={({ field: { name, onChange, value, disabled } }) => (
+                            render={({ field: { name, onChange, value, disabled} }) => (
                                 <Select
-                                    defaultValue="all"
+                                    defaultValue="pendente"
                                     name={name}
                                     onValueChange={onChange}
                                     value={value}
@@ -112,5 +142,5 @@ export function RegisterBudgetsModal({ onClose }: RegisterBudgetsModalProps) {
                 </DialogFooter>
             </form>
         </DialogContent>
-    );
+    )
 }

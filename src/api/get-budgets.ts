@@ -9,10 +9,10 @@ export interface GetOrdersQuery {
 interface Despesa {
     id: string;
     name: string;
-    data: Date | null;
+    data: string | null;
     valor: number;
     status: 'vencido' | 'pago' | 'normal' | 'pendente';
-    dataVencimento: Date | null;
+    dataVencimento: string | null;
     createdAt: Date;
     updatedAt: Date | null | undefined;
     userId: string;
@@ -47,8 +47,6 @@ export async function getBudgets({pageIndex, name, status}: GetOrdersQuery) {
             status
         }
     });
-
-    console.log("aqui: ", response.data.value)
 
     return response.data.value;
 }

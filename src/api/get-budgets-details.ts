@@ -8,10 +8,10 @@ export interface GetDespesaDetailsResponse {
     despesa: {
         id: string;
         name: string;
-        data: Date | null;
+        data: string;
         valor: number;
         status: 'vencido' | 'pago' | 'normal' | 'pendente';
-        dataVencimento: Date | null;
+        dataVencimento: string;
         createdAt: Date;
         updatedAt: Date | null | undefined;
         userId: string;

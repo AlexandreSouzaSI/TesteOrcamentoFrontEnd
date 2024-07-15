@@ -10,78 +10,63 @@ import { useState } from "react";
 import { deleteIncome } from "@/api/delete-income";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RendaResponse } from "@/api/get-income";
-import { editIncome } from "@/api/edit-status-income";
+import { editIncome, EditIncomeParams } from "@/api/edit-income";
+import { EditIncomeModal } from "@/components/edit-income";
 
-export interface RendaTableRowProps {
-    income: {
+export interface Renda {
         id: string;
         name: string;
-        data: Date | null;
+        data: string | null;
         valor: number;
         status: 'vencido' | 'pago' | 'normal' | 'pendente';
         createdAt: Date;
         updatedAt: Date | null | undefined;
         userId: string;
-    }
 }
 
-export function IncomeTableRow({ income }: RendaTableRowProps) {
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-    const queryClient = useQueryClient()
+export interface RendaTableRowProps {
+  income: Renda;
+}
 
-    const { mutateAsync: deleteIncomeFn} = useMutation({
-        mutationFn: deleteIncome,
-        onSuccess(_, { incomeId }) {
-            const cached = queryClient.getQueriesData<RendaResponse>({
-              queryKey: ['income'] 
-            });
-        
-            cached.forEach(([cachedKey, cachedData]) => {
-              if (!cachedData) {
-                return;
-              }
-              window.location.reload();
-              
-              queryClient.setQueryData<RendaResponse>(cachedKey, {
-                ...cachedData,
-                value: {
-                  ...cachedData.value,
-                  renda: cachedData.value.renda.filter(renda => renda.id !== incomeId),
-                },
-              });
-            });
-          },
-        });
+export function IncomeTableRow({ income  }: RendaTableRowProps) {
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const queryClient = useQueryClient()
 
-    const { mutateAsync: editIncomeFn } = useMutation({
-        mutationFn: editIncome,
-        onSuccess(_, { incomeId }) {
-          const cached = queryClient.getQueriesData<RendaResponse>({
-            queryKey: ['budgets'] 
+    const { mutateAsync: deleteIncomeFn } = useMutation({
+      mutationFn: deleteIncome,
+      onSuccess: (_, { incomeId }) => {
+          queryClient.setQueryData<RendaResponse>(['income'], old => {
+              if (!old) return old;
+              return {
+                  ...old,
+                  value: {
+                      ...old.value,
+                      renda: old.value.renda.filter(renda => renda.id !== incomeId)
+                  }
+              };
           });
-      
-          cached.forEach(([cachedKey, cachedData]) => {
-            if (!cachedData) {
-              return;
-            }
-            window.location.reload();
-            
-            queryClient.setQueryData<RendaResponse>(cachedKey, {
-              ...cachedData,
-              value: {
-                ...cachedData.value,
-                renda: cachedData.value.renda.map((renda) => {
-                    if (renda.id === incomeId) {
-                        return { ...renda }
-                    }
+      },
+  });
 
-                    return renda
-                })
-              },
-            });
+  const { mutateAsync: editIncomeFn } = useMutation({
+      mutationFn: editIncome,
+      onSuccess: (_, { incomeId, status, name, valor }) => {
+          queryClient.setQueryData<EditIncomeParams>(['income'], old => {
+              if (!old) return old;
+              return {
+                  ...old,
+                  value: {
+                      ...old,
+                      incomeId,
+                      name,
+                      valor,
+                      status,
+                  }
+              };
           });
-        },
-      });
+      },
+  });
 
     return (
         <>
@@ -117,10 +102,15 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
                 </Button>
             </TableCell>
             <TableCell>
-                <Button variant="ghost" size="xs">
-                    <FilePenIcon className="mr-2 h-3 w-3"/>
-                    Editar
-                </Button>
+                    <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                        <DialogTrigger asChild>
+                            <Button onClick={() => setIsEditOpen} variant="ghost" size="xs">
+                                <FilePenIcon className="mr-2 h-3 w-3"/>
+                                Editar
+                            </Button>
+                        </DialogTrigger>
+                        <EditIncomeModal onClose={() => setIsEditOpen(false)} open={isEditOpen} incomeId={income.id}/>
+                    </Dialog>
             </TableCell>
             <TableCell>
                 <Button onClick={() => deleteIncomeFn({ incomeId: income.id })} disabled={!['vencido', 'normal', 'pendente'].includes(income.status)} variant="ghost" size="xs">
