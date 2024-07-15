@@ -1,10 +1,44 @@
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Helmet } from "react-helmet-async";
-import { BudgetsTableRow } from "./budgets-table-row";
 import { BudgetsTableFilters } from "./budgets-table-filters";
 import { Pagination } from "@/components/pagination";
+import { BudgetsTableRow } from "./budgets-table-row";
+import { useSearchParams } from "react-router-dom";
+import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
+import { getBudgets } from "@/api/get-budgets";
 
 export function Budgets() {
+    const [searchParams, setSearchParams] = useSearchParams()
+    
+    const name = searchParams.get('name')
+    const status = searchParams.get('status')
+
+    const pageIndex = z.coerce
+    .number()
+    .transform((page) => page - 1)
+    .parse(searchParams.get('page') ?? '1')
+
+    const { data: result, isLoading: isLoadingBudgets } = useQuery({
+        queryKey: ['budgets', pageIndex, name, status],
+        queryFn: () => getBudgets({ pageIndex, name, status })
+    });
+
+    if (isLoadingBudgets) {
+        return <div>Loading...</div>;
+    }
+
+    if (!result?.despesas || result.despesas.length === 0) {
+        return <div></div>;
+    }
+
+    function handlePaginate(pageIndex: number) {
+        setSearchParams((prev) => {
+            prev.set('page', (pageIndex + 1).toString())
+
+            return prev
+        })
+    }
     return (
         <>
             <Helmet title="Orçamentos"/>
@@ -17,25 +51,27 @@ export function Budgets() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[64px]"></TableHead>
-                                    <TableHead className="w-[340px]">Identificador</TableHead>
                                     <TableHead>Nome</TableHead>
                                     <TableHead className="w-[240px]">Valor</TableHead>
                                     <TableHead className="w-[240px]">Data de Vencimento</TableHead>
-                                    <TableHead className="w-[240px]">Status</TableHead>
+                                    <TableHead className="w-[140px]">Status</TableHead>
                                     <TableHead className="w-[164px]"></TableHead>
+                                    <TableHead className="w-[132px]"></TableHead>
                                     <TableHead className="w-[132px]"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {Array.from({ length: 10 }).map((_, i) => {
-                                    return (
-                                        <BudgetsTableRow key={i}/>
-                                    )
-                                })}
+                                {result &&
+                                    result.despesas.map((despesa) => {
+                                        return <BudgetsTableRow key={despesa.id} despesa={despesa}/>
+                                    })
+                                }
                             </TableBody>
                         </Table>
                     </div>
-                    <Pagination pageIndex={0} totalCount={105} perPage={10} />
+                    {result && (
+                        <Pagination pageIndex={result.meta.pageIndex} totalCount={result.meta.totalCount} perPage={result.meta.perPage} onPageChange={handlePaginate} />
+                    )}
                 </div>
             </div>
         </>

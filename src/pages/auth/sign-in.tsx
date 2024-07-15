@@ -1,9 +1,11 @@
+import { signIn } from "@/api/sign-in";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useMutation } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -15,20 +17,34 @@ const signInForm = z.object({
 type SignInForm = z.infer<typeof signInForm>
 
 export function SignIn() {
-    const { register, handleSubmit, formState: { isSubmitting } } = useForm<SignInForm>()
+    const [searchParams] = useSearchParams()
+    const navigate = useNavigate()
+    const { register, handleSubmit, formState: { isSubmitting } } = useForm<SignInForm>({
+        defaultValues: {
+            email: searchParams.get('email') ?? ''
+        }
+    })
 
+    const { mutateAsync: authenticate } = useMutation({
+        mutationFn: signIn,
+    })
+
+    
     async function handleSignIn(data: SignInForm) {
         try {
-            console.log(data)
-            await new Promise((resolve) => setTimeout(resolve, 2000))
-            toast.success('Enviamos um link de autenticação para seu email', {
-                action: {
-                    label: 'Reenviar',
-                    onClick: () => handleSignIn(data)
-                }
-            })
+            const response = await authenticate({ email: data.email, password: data.password })
+
+            if (response.access_token) {
+                localStorage.setItem('token', response.access_token)
+                
+                navigate('/')
+
+                toast.success('Login bem-sucedido')
+            } else {
+                toast.error('Token não encontrado na resposta')
+            }
         } catch (error) {
-            toast.error('Credenciais invalidas')
+            toast.error('Credenciais inválidas')
         }
     }
 

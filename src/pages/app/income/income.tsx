@@ -3,8 +3,43 @@ import { Helmet } from "react-helmet-async";
 import { Pagination } from "@/components/pagination";
 import { IncomeTableFilters } from "./income-table-filters";
 import { IncomeTableRow } from "./income-table-row";
+import { useSearchParams } from "react-router-dom";
+import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
+import { getIncome } from "@/api/get-income";
 
 export function Income() {
+    const [searchParams, setSearchParams] = useSearchParams()
+
+    const name = searchParams.get('name')
+    const status = searchParams.get('status')
+
+    const pageIndex = z.coerce
+    .number()
+    .transform(page => page - 1)
+    .parse(searchParams.get('page') ?? '1')
+
+    const { data: result, isLoading: isLoadingIncome } = useQuery({
+        queryKey: ['income', pageIndex, name, status],
+        queryFn: () => getIncome({ pageIndex, name, status })
+    });
+
+    if (isLoadingIncome) {
+        return <div>Loading...</div>;
+    }
+
+    if (!result?.renda || result.renda.length === 0) {
+        return <div></div>;
+    }
+
+    function handlePaginate(pageIndex: number) {
+        setSearchParams(prev => {
+            prev.set('page', (pageIndex + 1).toString())
+
+            return prev
+        })
+    }
+
     return (
         <>
             <Helmet title="Orçamentos"/>
@@ -17,25 +52,27 @@ export function Income() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[64px]"></TableHead>
-                                    <TableHead className="w-[340px]">Identificador</TableHead>
                                     <TableHead>Nome</TableHead>
                                     <TableHead className="w-[240px]">Valor</TableHead>
                                     <TableHead className="w-[240px]">Data</TableHead>
-                                    <TableHead className="w-[240px]">Status</TableHead>
+                                    <TableHead className="w-[140px]">Status</TableHead>
                                     <TableHead className="w-[164px]"></TableHead>
+                                    <TableHead className="w-[132px]"></TableHead>
                                     <TableHead className="w-[132px]"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {Array.from({ length: 10 }).map((_, i) => {
-                                    return (
-                                        <IncomeTableRow key={i}/>
-                                    )
-                                })}
+                                {result &&
+                                    result.renda.map((income) => {
+                                        return <IncomeTableRow key={income.id} income={income}/>
+                                    })
+                                }
                             </TableBody>
                         </Table>
                     </div>
-                    <Pagination pageIndex={0} totalCount={105} perPage={10} />
+                    {result && (
+                        <Pagination pageIndex={result.meta.pageIndex} totalCount={result.meta.totalCount} perPage={result.meta.perPage} onPageChange={handlePaginate} />
+                    )}
                 </div>
             </div>
         </>

@@ -4,7 +4,6 @@ import {
     ResponsiveContainer,
     PieChart,
     Pie,
-    CartesianGrid,
     Cell,
 } from 'recharts'
 import colors from 'tailwindcss/colors'
