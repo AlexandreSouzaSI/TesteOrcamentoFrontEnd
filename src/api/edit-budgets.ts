@@ -9,13 +9,19 @@ export interface EditBudgetsParams {
   dataVencimento?: string
 }
 
-export async function editBudgets({ budgetsId, status, data, name, valor, dataVencimento }: EditBudgetsParams) {
-
+export async function editBudgets({
+  budgetsId,
+  status,
+  data,
+  name,
+  valor,
+  dataVencimento,
+}: EditBudgetsParams) {
   await api.put(`/despesa/${budgetsId}`, {
-    status: status ? status : 'pago',
+    status: status || 'pago',
     data,
     name,
     valor,
-    dataVencimento
+    dataVencimento,
   })
 }

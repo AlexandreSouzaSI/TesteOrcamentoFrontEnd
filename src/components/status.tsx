@@ -1,8 +1,4 @@
-type Status =
-  | 'vencido'
-  | 'pago'
-  | 'normal'
-  | 'pendente'
+type Status = 'vencido' | 'pago' | 'normal' | 'pendente'
 
 interface StatusProps {
   status: Status
@@ -12,7 +8,7 @@ const StatusMap: Record<Status, string> = {
   vencido: 'vencido',
   pago: 'pago',
   normal: 'normal',
-  pendente: 'pendente'
+  pendente: 'pendente',
 }
 
 export function Status({ status }: StatusProps) {

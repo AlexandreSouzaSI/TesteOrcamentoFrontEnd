@@ -1,24 +1,24 @@
-import { api } from "@/lib/axios"
-import { getUserIdFromToken } from "@/lib/getUserIdFromToken";
+import { api } from '@/lib/axios'
+import { getUserIdFromToken } from '@/lib/getUserIdFromToken'
 
 export interface DifferenceProps {
-    totalSum: {
-        value: {
-            difference: number
-        }
+  totalSum: {
+    value: {
+      difference: number
     }
+  }
 }
 
 export async function getDifference() {
-    const token = localStorage.getItem('token');
-    
-    const userId = getUserIdFromToken(token);
+  const token = localStorage.getItem('token')
 
-    if (!userId) {
-        throw new Error('User ID not found in token');
-    }
+  const userId = getUserIdFromToken(token)
 
-    const response = await api.get<DifferenceProps>(`/difference/${userId}`)
+  if (!userId) {
+    throw new Error('User ID not found in token')
+  }
 
-    return response.data.totalSum.value.difference
+  const response = await api.get<DifferenceProps>(`/difference/${userId}`)
+
+  return response.data.totalSum.value.difference
 }

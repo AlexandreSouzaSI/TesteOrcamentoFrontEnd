@@ -1,26 +1,29 @@
-import { api } from "@/lib/axios"
+import { api } from '@/lib/axios'
 
 export interface GetDespesaDetailsParams {
-    budgetsId: string
+  budgetsId: string
 }
 
 export interface GetDespesaDetailsResponse {
-    despesa: {
-        id: string;
-        name: string;
-        data: string;
-        valor: number;
-        status: 'vencido' | 'pago' | 'normal' | 'pendente';
-        dataVencimento: string;
-        createdAt: Date;
-        updatedAt: Date | null | undefined;
-        userId: string;
-    }
+  despesa: {
+    id: string
+    name: string
+    data: string
+    valor: number
+    status: 'vencido' | 'pago' | 'normal' | 'pendente'
+    dataVencimento: string
+    createdAt: Date
+    updatedAt: Date | null | undefined
+    userId: string
+  }
 }
 
-export async function getBudgetsDetails({ budgetsId }: GetDespesaDetailsParams) {
-    const response = await api.get<GetDespesaDetailsResponse>(`/despesas/${budgetsId}`)
+export async function getBudgetsDetails({
+  budgetsId,
+}: GetDespesaDetailsParams) {
+  const response = await api.get<GetDespesaDetailsResponse>(
+    `/despesas/${budgetsId}`,
+  )
 
-
-    return response.data.despesa
+  return response.data.despesa
 }

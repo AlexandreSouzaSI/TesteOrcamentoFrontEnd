@@ -1,9 +1,9 @@
-import { api } from "@/lib/axios"
+import { api } from '@/lib/axios'
 
 export interface DeleteDespesaParams {
-    budgetsId: string
+  budgetsId: string
 }
 
 export async function deleteBudgets({ budgetsId }: DeleteDespesaParams) {
-    await api.delete(`/despesa/${budgetsId}`)
+  await api.delete(`/despesa/${budgetsId}`)
 }

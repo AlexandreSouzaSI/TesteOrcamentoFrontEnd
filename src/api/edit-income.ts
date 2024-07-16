@@ -8,10 +8,15 @@ export interface EditIncomeParams {
   status?: string
 }
 
-export async function editIncome({ incomeId, status, data, name, valor }: EditIncomeParams) {
-
+export async function editIncome({
+  incomeId,
+  status,
+  data,
+  name,
+  valor,
+}: EditIncomeParams) {
   await api.put(`/renda/${incomeId}`, {
-    status: status ? status : 'pago',
+    status: status || 'pago',
     data,
     name,
     valor,

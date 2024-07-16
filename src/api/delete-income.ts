@@ -1,9 +1,9 @@
-import { api } from "@/lib/axios"
+import { api } from '@/lib/axios'
 
 export interface GetIncomeDetailsParams {
-    incomeId: string
+  incomeId: string
 }
 
 export async function deleteIncome({ incomeId }: GetIncomeDetailsParams) {
-    await api.delete(`/renda/${incomeId}`)
+  await api.delete(`/renda/${incomeId}`)
 }
