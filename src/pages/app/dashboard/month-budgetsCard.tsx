@@ -1,8 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { NotebookPen } from "lucide-react";
-import { DespesaResponse } from "@/api/get-budgets";
+import { getBudgets } from "@/api/get-budgets";
+import { useQuery } from "@tanstack/react-query";
 
-export function MonthBudgetsCard({ value }: DespesaResponse ) {
+export function MonthBudgetsCard() {
+    const { data: result, isLoading: isLoadingBudgets } = useQuery({
+        queryKey: ['budgets'],
+        queryFn: () => getBudgets({})
+    });
     return (
         <Card>
             <CardHeader className="flex-row space-y-0 items-center justify-between pb-2">
@@ -12,7 +17,7 @@ export function MonthBudgetsCard({ value }: DespesaResponse ) {
                 <NotebookPen className="h-4 w-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent className="space-y-1">
-                <span className="text-2xl font-bold tracking-tight">{`R$ ${value.meta.totalValue.toLocaleString('pt-BR', {
+                <span className="text-2xl font-bold tracking-tight">{`R$ ${result?.meta.totalValue.toLocaleString('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
                 })}`}</span>

@@ -1,17 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { DialogTrigger } from "@radix-ui/react-dialog";
 import { Check, FilePenIcon, Search, Trash2 } from "lucide-react";
 import { BusgetsDetails } from "./budgets-details";
 import { Status } from "@/components/status";
-import { format } from "date-fns";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteBudgets } from "@/api/delete-budgets";
-import { DespesaResponse } from "@/api/get-budgets";
-import { editBudgets, EditBudgetsParams } from "@/api/edit-budgets";
+import { editBudgets } from "@/api/edit-budgets";
 import { EditBudgetsModal } from "@/components/edit-budgets";
+import { toast } from "sonner";
 
 export interface Despesa {
     id: string;
@@ -19,7 +17,6 @@ export interface Despesa {
     data: string | null;
     valor: number;
     status: 'vencido' | 'pago' | 'normal' | 'pendente';
-    dataVencimento: string | null;
     createdAt: Date;
     updatedAt: Date | null | undefined;
     userId: string;
@@ -37,38 +34,23 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
     const { mutateAsync: deleteBudgetsFn } = useMutation({
         mutationFn: deleteBudgets,
         onSuccess: (_, { budgetsId }) => {
-            queryClient.setQueryData<DespesaResponse>(['budgets'], old => {
-                if (!old) return old;
-                return {
-                    ...old,
-                    value: {
-                        ...old.value,
-                        despesas: old.value.despesas.filter(despesa => despesa.id !== budgetsId)
-                    }
-                };
-            });
+            queryClient.invalidateQueries(['budgets']);
+            toast.success('Despesa excluída com sucesso.');
         },
+        onError: () => {
+            toast.error('Falha ao excluir a despesa. Tente novamente.');
+        }
     });
 
     const { mutateAsync: editBudgetsFn } = useMutation({
         mutationFn: editBudgets,
-        onSuccess: (_, { budgetsId, status, data, name, valor, dataVencimento }) => {
-            queryClient.setQueryData<EditBudgetsParams>(['budgets'], old => {
-                if (!old) return old;
-                return {
-                    ...old,
-                    value: {
-                        ...old,
-                        budgetsId,
-                        name,
-                        valor,
-                        status,
-                        dataVencimento,
-                        data
-                    }
-                };
-            });
+        onSuccess: () => {
+            queryClient.invalidateQueries(['budgets']);
+            toast.success('Despesa editada com sucesso.');
         },
+        onError: () => {
+            toast.error('Falha ao editar a despesa. Tente novamente.');
+        }
     });
 
     return (
@@ -90,7 +72,6 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
                     style: 'currency',
                     currency: 'BRL'
                 })}`}</TableCell>
-                <TableCell className="font-medium">{despesa.dataVencimento ? format(new Date(despesa.dataVencimento), 'dd/MM/yyyy') : '-'}</TableCell>
                 <TableCell>
                     <div className="flex items-center gap-2">
                         <span className="font-medium text-muted-foreground">
@@ -107,7 +88,7 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
                 <TableCell>
                     <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                         <DialogTrigger asChild>
-                            <Button onClick={() => setIsEditOpen} variant="ghost" size="xs">
+                            <Button onClick={() => setIsEditOpen(true)} variant="ghost" size="xs">
                                 <FilePenIcon className="mr-2 h-3 w-3"/>
                                 Editar
                             </Button>

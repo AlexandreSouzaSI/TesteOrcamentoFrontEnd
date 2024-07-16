@@ -18,5 +18,4 @@ export async function registerIncome({
         status,
     })
 
-    console.log('response: ', response)
 }

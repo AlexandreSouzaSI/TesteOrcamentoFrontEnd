@@ -36,7 +36,6 @@ export async function getIncome({pageIndex, name, status}: GetIncomeQuery) {
         throw new Error('Token not found in localStorage');
     }
 
-    console.log("pagina: ", pageIndex)
 
     const response = await api.get<RendaResponse>('/renda', {
         headers: {

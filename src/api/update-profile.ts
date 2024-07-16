@@ -25,7 +25,6 @@ export async function updateProfile({ name, password }: UpdateProfileBody) {
         }
     });
 
-    console.log("userEditado: ", response.data.user);
 
     return response.data.user;
 }

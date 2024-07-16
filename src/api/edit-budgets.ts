@@ -11,7 +11,6 @@ export interface EditBudgetsParams {
 
 export async function editBudgets({ budgetsId, status, data, name, valor, dataVencimento }: EditBudgetsParams) {
 
-    console.log(budgetsId, status, data, name, valor, dataVencimento)
   await api.put(`/despesa/${budgetsId}`, {
     status: status ? status : 'pago',
     data,

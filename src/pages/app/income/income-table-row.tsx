@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RendaResponse } from "@/api/get-income";
 import { editIncome, EditIncomeParams } from "@/api/edit-income";
 import { EditIncomeModal } from "@/components/edit-income";
+import { toast } from "sonner";
 
 export interface Renda {
         id: string;
@@ -36,37 +37,24 @@ export function IncomeTableRow({ income  }: RendaTableRowProps) {
     const { mutateAsync: deleteIncomeFn } = useMutation({
       mutationFn: deleteIncome,
       onSuccess: (_, { incomeId }) => {
-          queryClient.setQueryData<RendaResponse>(['income'], old => {
-              if (!old) return old;
-              return {
-                  ...old,
-                  value: {
-                      ...old.value,
-                      renda: old.value.renda.filter(renda => renda.id !== incomeId)
-                  }
-              };
-          });
-      },
-  });
+        queryClient.invalidateQueries(['incomeId']);
+        toast.success('Renda excluída com sucesso.');
+    },
+    onError: () => {
+        toast.error('Falha ao excluir a renda. Tente novamente.');
+    }
+});
 
   const { mutateAsync: editIncomeFn } = useMutation({
       mutationFn: editIncome,
-      onSuccess: (_, { incomeId, status, name, valor }) => {
-          queryClient.setQueryData<EditIncomeParams>(['income'], old => {
-              if (!old) return old;
-              return {
-                  ...old,
-                  value: {
-                      ...old,
-                      incomeId,
-                      name,
-                      valor,
-                      status,
-                  }
-              };
-          });
-      },
-  });
+      onSuccess: () => {
+        queryClient.invalidateQueries(['incomeId']);
+        toast.success('Renda editada com sucesso.');
+    },
+    onError: () => {
+        toast.error('Falha ao editar a renda. Tente novamente.');
+    }
+});
 
     return (
         <>
@@ -87,7 +75,6 @@ export function IncomeTableRow({ income  }: RendaTableRowProps) {
                     style: 'currency',
                     currency: 'BRL'
                 })}`}</TableCell>
-            <TableCell className="font-medium">{income.data ? format((income.data), 'dd/MM/yyyy') : '-'}</TableCell>
             <TableCell>
                 <div className="flex items-center gap-2">
                     <span className="font-medium text-muted-foreground">

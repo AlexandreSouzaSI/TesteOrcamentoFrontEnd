@@ -110,10 +110,10 @@ export function EditBudgetsModal({budgetsId, open, onClose}: BudgetsDetailsProps
                         </Label>
                         <Input className="col-span-3" id="valor" {...register('valor')}/>
 
-                        <Label className="text-right" htmlFor="date">
+                       {/*  <Label className="text-right" htmlFor="date">
                             Data do Vencimento
                         </Label>
-                        <Input type="date" className="col-span-3" id="dataVencimento" {...register('dataVencimento')}/>
+                        <Input type="date" className="col-span-3" id="dataVencimento" {...register('dataVencimento')}/> */}
                         
                         <Label className="text-right" htmlFor="status">
                             Status
