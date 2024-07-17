@@ -37,16 +37,22 @@ export async function getBudgets({ pageIndex, name, status }: GetOrdersQuery) {
     throw new Error('Token not found in localStorage')
   }
 
-  const response = await api.get<DespesaResponse>('/despesas', {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  if (pageIndex === 0) {
+    pageIndex = 1
+  }
+
+  const response = await api.get<DespesaResponse>(
+    `/despesas?pageIndex=${pageIndex}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        name,
+        status,
+      },
     },
-    params: {
-      pageIndex,
-      name,
-      status,
-    },
-  })
+  )
 
   return response.data.value
 }

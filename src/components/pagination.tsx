@@ -30,14 +30,14 @@ export function Pagination({
 
       <div className="flex items-center gap-6 lg:gap-8">
         <div className="text-sm font-medium">
-          Página {pageIndex + 1} de {pages}
+          Página {pageIndex} de {pages}
         </div>
         <div className="flex items-center gap-2">
           <Button
             onClick={() => onPageChange(0)}
             variant="outline"
             className="h-8 w-8 p-0"
-            disabled={pageIndex === 0}
+            disabled={pageIndex === 1}
           >
             <ChevronsLeft className="h-4 w-4" />
             <span className="sr-only">Primeira página</span>
@@ -46,7 +46,7 @@ export function Pagination({
             onClick={() => onPageChange(pageIndex - 1)}
             variant="outline"
             className="h-8 w-8 p-0"
-            disabled={pageIndex === 0}
+            disabled={pageIndex === 1}
           >
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Página anterior</span>
@@ -55,7 +55,7 @@ export function Pagination({
             onClick={() => onPageChange(pageIndex + 1)}
             variant="outline"
             className="h-8 w-8 p-0"
-            disabled={pages <= pageIndex + 1}
+            disabled={pages <= pageIndex}
           >
             <ChevronRight className="h-4 w-4" />
             <span className="sr-only">Próxima página</span>
@@ -64,7 +64,7 @@ export function Pagination({
             onClick={() => onPageChange(pages - 1)}
             variant="outline"
             className="h-8 w-8 p-0"
-            disabled={pages <= pageIndex + 1}
+            disabled={pages <= pageIndex}
           >
             <ChevronsRight className="h-4 w-4" />
             <span className="sr-only">Última página</span>

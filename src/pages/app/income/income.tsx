@@ -24,8 +24,8 @@ export function Income() {
 
   const pageIndex = z.coerce
     .number()
-    .transform((page) => page - 1)
-    .parse(searchParams.get('page') ?? '1')
+    .transform((pageIndex) => pageIndex - 1)
+    .parse(searchParams.get('pageIndex') ?? '1')
 
   const { data: result, isLoading: isLoadingIncome } = useQuery({
     queryKey: ['income', pageIndex, name, status],
@@ -42,7 +42,7 @@ export function Income() {
 
   function handlePaginate(pageIndex: number) {
     setSearchParams((prev) => {
-      prev.set('page', (pageIndex + 1).toString())
+      prev.set('pageIndex', (pageIndex + 1).toString())
 
       return prev
     })

@@ -36,16 +36,22 @@ export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
     throw new Error('Token not found in localStorage')
   }
 
-  const response = await api.get<RendaResponse>('/renda', {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  if (pageIndex === 0) {
+    pageIndex = 1
+  }
+
+  const response = await api.get<RendaResponse>(
+    `/renda?pageIndex=${pageIndex}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        name,
+        status,
+      },
     },
-    params: {
-      pageIndex,
-      name,
-      status,
-    },
-  })
+  )
 
   return response.data.value
 }
