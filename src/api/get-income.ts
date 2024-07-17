@@ -38,11 +38,25 @@ export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
 
   if (pageIndex === 0) {
     pageIndex = 1
+
+    const response = await api.get<RendaResponse>(
+      `/renda?pageIndex=${pageIndex}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          name,
+          status,
+        },
+      },
+    )
+
+    return response.data.value
   }
 
-  const response = await api.get<RendaResponse>(
-    `/renda?pageIndex=${pageIndex}`,
-    {
+  if (pageIndex === undefined) {
+    const response = await api.get<RendaResponse>(`/renda`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -50,8 +64,8 @@ export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
         name,
         status,
       },
-    },
-  )
+    })
 
-  return response.data.value
+    return response.data.value
+  }
 }
