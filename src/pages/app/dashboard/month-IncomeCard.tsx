@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { HandCoins } from 'lucide-react'
 
-import { getIncome } from '@/api/get-income'
+import { getIncomeValueSum } from '@/api/get-income-valueSum'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function MonthIncomeCard() {
   const { data: resultIncome } = useQuery({
     queryKey: ['income'],
-    queryFn: () => getIncome({}),
+    queryFn: () => getIncomeValueSum({}),
   })
   return (
     <Card>

@@ -29,20 +29,19 @@ export interface RendaResponse {
   }
 }
 
-export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
+export async function getIncomeValueSum({
+  pageIndex,
+  name,
+  status,
+}: GetIncomeQuery) {
   const token = localStorage.getItem('token')
 
   if (!token) {
     throw new Error('Token not found in localStorage')
   }
 
-  if (pageIndex === 0) {
-    pageIndex = 1
-  }
-
-  const response = await api.get<RendaResponse>(
-    `/renda?pageIndex=${pageIndex}`,
-    {
+  if (pageIndex === undefined) {
+    const response = await api.get<RendaResponse>(`/renda`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -50,8 +49,8 @@ export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
         name,
         status,
       },
-    },
-  )
+    })
 
-  return response.data.value
+    return response.data.value
+  }
 }

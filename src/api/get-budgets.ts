@@ -39,25 +39,11 @@ export async function getBudgets({ pageIndex, name, status }: GetOrdersQuery) {
 
   if (pageIndex === 0) {
     pageIndex = 1
-
-    const response = await api.get<DespesaResponse>(
-      `/despesas?pageIndex=${pageIndex}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          name,
-          status,
-        },
-      },
-    )
-
-    return response.data.value
   }
 
-  if (pageIndex === undefined) {
-    const response = await api.get<DespesaResponse>('/despesas', {
+  const response = await api.get<DespesaResponse>(
+    `/despesas?pageIndex=${pageIndex}`,
+    {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -65,8 +51,8 @@ export async function getBudgets({ pageIndex, name, status }: GetOrdersQuery) {
         name,
         status,
       },
-    })
+    },
+  )
 
-    return response.data.value
-  }
+  return response.data.value
 }

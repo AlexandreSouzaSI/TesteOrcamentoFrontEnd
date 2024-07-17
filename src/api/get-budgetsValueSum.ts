@@ -1,25 +1,26 @@
 import { api } from '@/lib/axios'
 
-export interface GetIncomeQuery {
+export interface GetOrdersQuery {
   pageIndex?: number | null
   name?: string | null
   status?: string | null
 }
 
-interface Renda {
+interface Despesa {
   id: string
   name: string
   data: string | null
   valor: number
   status: 'vencido' | 'pago' | 'normal' | 'pendente'
+  dataVencimento: string | null
   createdAt: Date
   updatedAt: Date | null | undefined
   userId: string
 }
 
-export interface RendaResponse {
+export interface DespesaResponse {
   value: {
-    renda: Renda[]
+    despesas: Despesa[]
     meta: {
       pageIndex: number
       perPage: number
@@ -29,20 +30,19 @@ export interface RendaResponse {
   }
 }
 
-export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
+export async function getBudgetsValueSum({
+  pageIndex,
+  name,
+  status,
+}: GetOrdersQuery) {
   const token = localStorage.getItem('token')
 
   if (!token) {
     throw new Error('Token not found in localStorage')
   }
 
-  if (pageIndex === 0) {
-    pageIndex = 1
-  }
-
-  const response = await api.get<RendaResponse>(
-    `/renda?pageIndex=${pageIndex}`,
-    {
+  if (pageIndex === undefined) {
+    const response = await api.get<DespesaResponse>('/despesas', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -50,8 +50,8 @@ export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
         name,
         status,
       },
-    },
-  )
+    })
 
-  return response.data.value
+    return response.data.value
+  }
 }
