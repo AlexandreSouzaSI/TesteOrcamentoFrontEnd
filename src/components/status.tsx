@@ -1,4 +1,4 @@
-type Status = 'vencido' | 'pago' | 'normal' | 'pendente'
+type Status = 'vencido' | 'pago' | 'normal' | 'pendente' | 'hoje'
 
 interface StatusProps {
   status: Status
@@ -9,6 +9,7 @@ const StatusMap: Record<Status, string> = {
   pago: 'pago',
   normal: 'normal',
   pendente: 'pendente',
+  hoje: 'hoje',
 }
 
 export function Status({ status }: StatusProps) {
@@ -24,6 +25,10 @@ export function Status({ status }: StatusProps) {
 
       {status === 'pago' && (
         <span className="h-2 w-2 rounded-full bg-emerald-500" />
+      )}
+
+      {status === 'hoje' && (
+        <span className="h-2 w-2 rounded-full bg-violet-500" />
       )}
 
       {['pendente'].includes(status) && (

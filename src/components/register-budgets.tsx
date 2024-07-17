@@ -111,6 +111,7 @@ export function RegisterBudgetsModal({ onClose }: RegisterBudgetsModalProps) {
                     <SelectItem value="pendente">Pendente</SelectItem>
                     <SelectItem value="pago">Pago</SelectItem>
                     <SelectItem value="vencido">Vencido</SelectItem>
+                    <SelectItem value="hoje">Hoje</SelectItem>
                   </SelectContent>
                 </Select>
               )}

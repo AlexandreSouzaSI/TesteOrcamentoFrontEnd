@@ -1,11 +1,12 @@
 import { DialogTrigger } from '@radix-ui/react-dialog'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Check, FilePenIcon, Search, Trash2 } from 'lucide-react'
+import { Check, FilePenIcon, Search } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { deleteIncome } from '@/api/delete-income'
 import { editIncome } from '@/api/edit-income'
+import { DeleteConfirmationModal } from '@/components/delete-ConfirmationModal'
 import { EditIncomeModal } from '@/components/edit-income'
 import { Status } from '@/components/status'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,7 @@ export interface Renda {
   name: string
   data: string | null
   valor: number
-  status: 'vencido' | 'pago' | 'normal' | 'pendente'
+  status: 'vencido' | 'pago' | 'normal' | 'pendente' | 'hoje'
   createdAt: Date
   updatedAt: Date | null | undefined
   userId: string
@@ -50,6 +51,7 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
     onSuccess: () => {
       queryClient.invalidateQueries()
       toast.success('Renda editada com sucesso.')
+      setIsEditOpen(false) // Fechar o modal ao sucesso
     },
     onError: () => {
       toast.error('Falha ao editar a renda. Tente novamente.')
@@ -81,7 +83,7 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
         <TableCell>
           <div className="flex items-center gap-2">
             <span className="font-medium text-muted-foreground">
-              <Status status={income.status ? income.status : 'vencido'} />
+              <Status status={income.status ? income.status : 'pendente'} />
             </span>
           </div>
         </TableCell>
@@ -98,7 +100,11 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
         <TableCell>
           <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setIsEditOpen} variant="ghost" size="xs">
+              <Button
+                onClick={() => setIsEditOpen(true)}
+                variant="ghost"
+                size="xs"
+              >
                 <FilePenIcon className="mr-2 h-3 w-3" />
                 Editar
               </Button>
@@ -111,17 +117,10 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
           </Dialog>
         </TableCell>
         <TableCell>
-          <Button
-            onClick={() => deleteIncomeFn({ incomeId: income.id })}
-            disabled={
-              !['vencido', 'normal', 'pendente'].includes(income.status)
-            }
-            variant="ghost"
-            size="xs"
-          >
-            <Trash2 className="mr-2 h-3 w-3 fill-red-400" />
-            Excluir
-          </Button>
+          <DeleteConfirmationModal
+            onConfirm={() => deleteIncomeFn({ incomeId: income.id })}
+            status={income.status}
+          />
         </TableCell>
       </TableRow>
     </>

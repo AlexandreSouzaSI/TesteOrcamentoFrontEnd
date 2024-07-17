@@ -114,6 +114,7 @@ export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
                       <SelectItem value="pendente">pendente</SelectItem>
                       <SelectItem value="pago">Pago</SelectItem>
                       <SelectItem value="vencido">Vencido</SelectItem>
+                      <SelectItem value="hoje">Hoje</SelectItem>
                     </SelectContent>
                   </Select>
                 )

@@ -8,6 +8,7 @@ import { Pagination } from '@/components/pagination'
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -36,21 +37,16 @@ export function Income() {
     return <div>Loading...</div>
   }
 
-  if (!result?.renda || result.renda.length === 0) {
-    return <div></div>
-  }
-
   function handlePaginate(pageIndex: number) {
     setSearchParams((prev) => {
       prev.set('pageIndex', (pageIndex + 1).toString())
-
       return prev
     })
   }
 
   return (
     <>
-      <Helmet title="Orçamentos" />
+      <Helmet title="Renda" />
       <div className="flex flex-col gap-4 p-10">
         <h1 className="text-3xl font-bold tracking-tight">Renda</h1>
         <div className="space-y-2.5">
@@ -70,10 +66,17 @@ export function Income() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {result &&
-                  result.renda.map((income) => {
-                    return <IncomeTableRow key={income.id} income={income} />
-                  })}
+                {result?.renda && result.renda.length > 0 ? (
+                  result.renda.map((income) => (
+                    <IncomeTableRow key={income.id} income={income} />
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-4 text-center">
+                      Nenhuma renda encontrada.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>

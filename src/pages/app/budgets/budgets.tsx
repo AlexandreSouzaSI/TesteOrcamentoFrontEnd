@@ -8,6 +8,7 @@ import { Pagination } from '@/components/pagination'
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -36,19 +37,15 @@ export function Budgets() {
     return <div>Loading...</div>
   }
 
-  if (!result?.despesas || result.despesas.length === 0) {
-    return <div></div>
-  }
-
   function handlePaginate(pageIndex: number) {
     setSearchParams((prev) => {
       prev.set('pageIndex', (pageIndex + 1).toString())
-
       return prev
     })
   }
+
   return (
-    <>
+    <div>
       <Helmet title="Orçamentos" />
       <div className="flex flex-col gap-4 p-10">
         <h1 className="text-3xl font-bold tracking-tight">Orçamentos</h1>
@@ -71,12 +68,17 @@ export function Budgets() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {result &&
-                  result.despesas.map((despesa) => {
-                    return (
-                      <BudgetsTableRow key={despesa.id} despesa={despesa} />
-                    )
-                  })}
+                {result?.despesas && result.despesas.length > 0 ? (
+                  result.despesas.map((despesa) => (
+                    <BudgetsTableRow key={despesa.id} despesa={despesa} />
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-4 text-center">
+                      Nenhuma despesa encontrada.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
@@ -90,6 +92,6 @@ export function Budgets() {
           )}
         </div>
       </div>
-    </>
+    </div>
   )
 }

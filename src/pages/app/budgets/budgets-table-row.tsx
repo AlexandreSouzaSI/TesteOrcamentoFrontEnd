@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Check, FilePenIcon, Search, Trash2 } from 'lucide-react'
+import { Check, FilePenIcon, Search } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { deleteBudgets } from '@/api/delete-budgets'
 import { editBudgets } from '@/api/edit-budgets'
+import { DeleteConfirmationModal } from '@/components/delete-ConfirmationModal'
 import { EditBudgetsModal } from '@/components/edit-budgets'
 import { Status } from '@/components/status'
 import { Button } from '@/components/ui/button'
@@ -18,7 +19,7 @@ export interface Despesa {
   name: string
   data: string | null
   valor: number
-  status: 'vencido' | 'pago' | 'normal' | 'pendente'
+  status: 'vencido' | 'pago' | 'normal' | 'pendente' | 'hoje'
   createdAt: Date
   updatedAt: Date | null | undefined
   userId: string
@@ -49,6 +50,7 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
     onSuccess: () => {
       queryClient.invalidateQueries()
       toast.success('Despesa editada com sucesso.')
+      setIsEditOpen(false) // Fechar o modal ao sucesso
     },
     onError: () => {
       toast.error('Falha ao editar a despesa. Tente novamente.')
@@ -116,17 +118,10 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
           </Dialog>
         </TableCell>
         <TableCell>
-          <Button
-            onClick={() => deleteBudgetsFn({ budgetsId: despesa.id })}
-            disabled={
-              !['vencido', 'normal', 'pendente'].includes(despesa.status)
-            }
-            variant="ghost"
-            size="xs"
-          >
-            <Trash2 className="mr-2 h-3 w-3 fill-red-400" />
-            Excluir
-          </Button>
+          <DeleteConfirmationModal
+            onConfirm={() => deleteBudgetsFn({ budgetsId: despesa.id })}
+            status={despesa.status}
+          />
         </TableCell>
       </TableRow>
     </>
