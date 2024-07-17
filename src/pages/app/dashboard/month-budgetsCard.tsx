@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { NotebookPen } from 'lucide-react'
 
-import { getBudgets } from '@/api/get-budgets'
+import { getBudgetsValueSum } from '@/api/get-budgetsValueSum'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function MonthBudgetsCard() {
   const { data: result } = useQuery({
     queryKey: ['budgets'],
-    queryFn: () => getBudgets({}),
+    queryFn: () => getBudgetsValueSum({}),
   })
   return (
     <Card>
