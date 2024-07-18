@@ -33,15 +33,15 @@ export function Budgets() {
     queryFn: () => getBudgets({ pageIndex, name, status }),
   })
 
-  if (isLoadingBudgets) {
-    return <div>Loading...</div>
-  }
-
   function handlePaginate(pageIndex: number) {
     setSearchParams((prev) => {
       prev.set('pageIndex', (pageIndex + 1).toString())
       return prev
     })
+  }
+
+  if (isLoadingBudgets) {
+    return <div>Loading...</div>
   }
 
   return (

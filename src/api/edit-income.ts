@@ -3,7 +3,7 @@ import { api } from '@/lib/axios'
 export interface EditIncomeParams {
   incomeId: string
   name?: string
-  data?: Date | null
+  data?: string | null
   valor?: number
   status?: string
 }

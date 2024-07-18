@@ -2,6 +2,8 @@ import { Helmet } from 'react-helmet-async'
 
 import { MonthBudgetsCard } from './month-budgetsCard'
 import { MonthIncomeCard } from './month-IncomeCard'
+import { MonthOverdueConstanciesCard } from './month-overdueConstancies'
+import { MonthPaymentsTodayCard } from './month-paymentsTodayCard'
 import { MonthRevenueCard } from './month-revenueCard'
 import { PopularBudgetsChart } from './popular-budgets-chart'
 import { RevenueChart } from './revenue-chart'
@@ -21,6 +23,10 @@ export function Dashboard() {
         <div className="grid grid-cols-9 gap-4">
           <RevenueChart />
           <PopularBudgetsChart />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <MonthPaymentsTodayCard />
+          <MonthOverdueConstanciesCard />
         </div>
       </div>
     </>

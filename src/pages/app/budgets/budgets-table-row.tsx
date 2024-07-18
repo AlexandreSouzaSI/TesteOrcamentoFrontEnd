@@ -1,23 +1,25 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Check, FilePenIcon, Search } from 'lucide-react'
-import { useState } from 'react'
+import { Check, Search } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { deleteBudgets } from '@/api/delete-budgets'
 import { editBudgets } from '@/api/edit-budgets'
 import { DeleteConfirmationModal } from '@/components/delete-ConfirmationModal'
-import { EditBudgetsModal } from '@/components/edit-budgets'
 import { Status } from '@/components/status'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { TableCell, TableRow } from '@/components/ui/table'
+import { formatDate, isDateFuture, isDateToday } from '@/lib/formatData'
 
 import { BusgetsDetails } from './budgets-details'
+import { BusgetsEdit } from './budgets-edit'
 
 export interface Despesa {
   id: string
   name: string
-  data: string | null
+  dataVencimento: string | null
   valor: number
   status: 'vencido' | 'pago' | 'normal' | 'pendente' | 'hoje'
   createdAt: Date
@@ -31,7 +33,7 @@ export interface DespesaTableRowProps {
 
 export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const [isEditOpen, setIsEditOpen] = useState(false)
+
   const queryClient = useQueryClient()
 
   const { mutateAsync: deleteBudgetsFn } = useMutation({
@@ -50,12 +52,47 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
     onSuccess: () => {
       queryClient.invalidateQueries()
       toast.success('Despesa editada com sucesso.')
-      setIsEditOpen(false) // Fechar o modal ao sucesso
     },
     onError: () => {
       toast.error('Falha ao editar a despesa. Tente novamente.')
     },
   })
+
+  const handleStatusChange = async (newStatus: Despesa['status']) => {
+    try {
+      await editBudgetsFn({ budgetsId: despesa.id, status: newStatus })
+      queryClient.invalidateQueries()
+      toast.success('Status atualizado com sucesso.')
+    } catch (error) {
+      toast.error('Falha ao atualizar o status. Tente novamente.')
+    }
+  }
+
+  const getStatus = () => {
+    if (despesa.dataVencimento) {
+      if (isDateToday(despesa.dataVencimento) && despesa.status !== 'pago') {
+        return 'hoje'
+      }
+      if (isDateFuture(despesa.dataVencimento) && despesa.status !== 'pago') {
+        return 'pendente'
+      }
+      if (
+        !isDateFuture(despesa.dataVencimento) &&
+        !isDateToday(despesa.dataVencimento) &&
+        despesa.status !== 'pago'
+      ) {
+        return 'vencido'
+      }
+    }
+    return despesa.status || 'pendente'
+  }
+
+  useEffect(() => {
+    const visualStatus = getStatus()
+    if (visualStatus !== despesa.status) {
+      handleStatusChange(visualStatus)
+    }
+  }, [despesa])
 
   return (
     <>
@@ -68,7 +105,9 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
                 <span className="sr-only">Detalhes do orçamento</span>
               </Button>
             </DialogTrigger>
-            <BusgetsDetails open={isDetailsOpen} budgetsId={despesa.id} />
+            {isDetailsOpen && (
+              <BusgetsDetails open={isDetailsOpen} budgetsId={despesa.id} />
+            )}
           </Dialog>
         </TableCell>
         <TableCell className="font-medium">{despesa.name}</TableCell>
@@ -82,15 +121,22 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
         <TableCell>
           <div className="flex items-center gap-2">
             <span className="font-medium text-muted-foreground">
-              <Status status={despesa.status ? despesa.status : 'pendente'} />
+              {despesa.dataVencimento
+                ? formatDate(despesa.dataVencimento)
+                : '-'}
+            </span>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-muted-foreground">
+              <Status status={getStatus()} />
             </span>
           </div>
         </TableCell>
         <TableCell>
           <Button
-            onClick={() =>
-              editBudgetsFn({ budgetsId: despesa.id, status: 'pago' })
-            }
+            onClick={() => handleStatusChange('pago')}
             variant="ghost"
             size="xs"
           >
@@ -99,23 +145,7 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
           </Button>
         </TableCell>
         <TableCell>
-          <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={() => setIsEditOpen(true)}
-                variant="ghost"
-                size="xs"
-              >
-                <FilePenIcon className="mr-2 h-3 w-3" />
-                Editar
-              </Button>
-            </DialogTrigger>
-            <EditBudgetsModal
-              onClose={() => setIsEditOpen(false)}
-              open={isEditOpen}
-              budgetsId={despesa.id}
-            />
-          </Dialog>
+          <BusgetsEdit despesa={despesa} />
         </TableCell>
         <TableCell>
           <DeleteConfirmationModal

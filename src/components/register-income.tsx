@@ -28,6 +28,7 @@ const incomeBodyForm = z.object({
   name: z.string(),
   valor: z.coerce.number(),
   status: z.string(),
+  data: z.string().optional(),
 })
 
 type IncomeBodySchema = z.infer<typeof incomeBodyForm>
@@ -63,6 +64,7 @@ export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
         name: data.name,
         valor: data.valor,
         status: data.status,
+        data: data.data,
       })
     } catch (error) {}
   }
@@ -87,10 +89,15 @@ export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
             </Label>
             <Input className="col-span-3" id="valor" {...register('valor')} />
 
-            {/* <Label className="text-right" htmlFor="date">
-                            Data
-                        </Label>
-                        <Input type="date" className="col-span-3" id="dataVencimento" {...register('data')}/> */}
+            <Label className="text-right" htmlFor="date">
+              Data
+            </Label>
+            <Input
+              type="date"
+              className="col-span-3"
+              id="dataVencimento"
+              {...register('data')}
+            />
 
             <Label className="text-right" htmlFor="status">
               Status

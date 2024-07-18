@@ -9,7 +9,7 @@ export interface GetOrdersQuery {
 interface Despesa {
   id: string
   name: string
-  data: string | null
+  data: Date | null
   valor: number
   status: 'vencido' | 'pago' | 'normal' | 'pendente'
   dataVencimento: string | null

@@ -1,17 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { DialogTrigger } from '@radix-ui/react-dialog'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Check, FilePenIcon, Search } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { deleteIncome } from '@/api/delete-income'
 import { editIncome } from '@/api/edit-income'
 import { DeleteConfirmationModal } from '@/components/delete-ConfirmationModal'
-import { EditIncomeModal } from '@/components/edit-income'
+import { EditIncomeModal } from '@/components/edit-incomeModal'
 import { Status } from '@/components/status'
 import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
 import { TableCell, TableRow } from '@/components/ui/table'
+import { formatDate, isDateFuture, isDateToday } from '@/lib/formatData'
 
 import { IncomeDetails } from './income-details'
 
@@ -58,6 +60,43 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
     },
   })
 
+  // Função para calcular o status visual
+  const getStatus = () => {
+    if (income.data) {
+      if (isDateToday(income.data) && income.status !== 'pago') {
+        return 'hoje'
+      }
+      if (isDateFuture(income.data) && income.status !== 'pago') {
+        return 'pendente'
+      }
+      if (
+        !isDateFuture(income.data) &&
+        !isDateToday(income.data) &&
+        income.status !== 'pago'
+      ) {
+        return 'vencido'
+      }
+    }
+    return income.status || 'pendente'
+  }
+
+  const handleStatusChange = async (newStatus: Renda['status']) => {
+    try {
+      await editIncomeFn({ incomeId: income.id, status: newStatus })
+      queryClient.invalidateQueries()
+      toast.success('Status atualizado com sucesso.')
+    } catch (error) {
+      toast.error('Falha ao atualizar o status. Tente novamente.')
+    }
+  }
+
+  useEffect(() => {
+    const visualStatus = getStatus()
+    if (visualStatus !== income.status) {
+      handleStatusChange(visualStatus)
+    }
+  }, [income])
+
   return (
     <>
       <TableRow key={income.id}>
@@ -83,13 +122,20 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
         <TableCell>
           <div className="flex items-center gap-2">
             <span className="font-medium text-muted-foreground">
-              <Status status={income.status ? income.status : 'pendente'} />
+              {income.data ? formatDate(income.data) : '-'}
+            </span>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-muted-foreground">
+              <Status status={getStatus()} />
             </span>
           </div>
         </TableCell>
         <TableCell>
           <Button
-            onClick={() => editIncomeFn({ incomeId: income.id })}
+            onClick={() => handleStatusChange('pago')}
             variant="ghost"
             size="xs"
           >

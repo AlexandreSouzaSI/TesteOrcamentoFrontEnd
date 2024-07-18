@@ -16,13 +16,23 @@ export function MonthRevenueCard() {
         <DollarSign className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="space-y-1">
-        <span className="text-2xl font-bold tracking-tight">{`R$ ${resultDifference?.toLocaleString(
-          'pt-BR',
-          {
-            style: 'currency',
-            currency: 'BRL',
-          },
-        )}`}</span>
+        <span
+          className={`text-2xl font-bold tracking-tight ${
+            resultDifference !== undefined && resultDifference < 0
+              ? 'text-rose-500'
+              : 'text-blue-500'
+          }`}
+        >
+          {resultDifference !== undefined
+            ? `R$ ${resultDifference < 0 ? '-' : ''}${Math.abs(
+                resultDifference,
+              ).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })}`
+            : 'R$ 0,00'}
+        </span>
+
         <p>
           <span className="text-emerald-500 dark:text-emerald-400"> +2% </span>
           em relação ao mês passado

@@ -29,6 +29,7 @@ const budgetsBodyForm = z.object({
   valor: z.coerce.number(),
   status: z.string().optional(),
   userId: z.string(),
+  dataVencimento: z.string().optional(),
 })
 
 type BudgetsBodySchema = z.infer<typeof budgetsBodyForm>
@@ -64,6 +65,7 @@ export function RegisterBudgetsModal({ onClose }: RegisterBudgetsModalProps) {
         name: data.name,
         valor: data.valor,
         status: data.status,
+        dataVencimento: data.dataVencimento,
       })
     } catch (error) {
       // A mensagem de erro já está sendo tratada pelo onError do mutateAsync
@@ -89,6 +91,16 @@ export function RegisterBudgetsModal({ onClose }: RegisterBudgetsModalProps) {
               Valor
             </Label>
             <Input className="col-span-3" id="valor" {...register('valor')} />
+
+            <Label className="text-right" htmlFor="dataVencimento">
+              Data Vencimento
+            </Label>
+            <Input
+              type="date"
+              className="col-span-3"
+              id="dataVencimento"
+              {...register('dataVencimento')}
+            />
 
             <Label className="text-right" htmlFor="status">
               Status

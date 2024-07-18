@@ -5,8 +5,8 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { editIncome } from '@/api/edit-income'
-import { getIncomeDetails } from '@/api/get-income-details'
+import { editBudgets } from '@/api/edit-budgets'
+import { getBudgetsDetails } from '@/api/get-budgets-details'
 
 import { Button } from './ui/button'
 import {
@@ -27,30 +27,32 @@ import {
   SelectValue,
 } from './ui/select'
 
-const incomeBodyForm = z.object({
-  incomeId: z.string(),
+const budgetsBodyForm = z.object({
+  budgetsId: z.string(),
   name: z.string().optional(),
+  data: z.string().optional(),
   valor: z.coerce.number().optional(),
   status: z.string().optional(),
+  dataVencimento: z.string().optional(),
 })
 
-type IncomeBodySchema = z.infer<typeof incomeBodyForm>
+type BudgetsBodySchema = z.infer<typeof budgetsBodyForm>
 
-export interface IncomeDetailsProps {
-  incomeId: string
+export interface BudgetsDetailsProps {
+  budgetsId: string
   open: boolean
   onClose: () => void
 }
 
-export function EditIncomeModal({
-  incomeId,
+export function EditBudgetsModal({
+  budgetsId,
   open,
   onClose,
-}: IncomeDetailsProps) {
+}: BudgetsDetailsProps) {
   const queryClient = useQueryClient()
   const { data: result } = useQuery({
-    queryKey: ['income', incomeId],
-    queryFn: () => getIncomeDetails({ incomeId }),
+    queryKey: ['budgets', budgetsId],
+    queryFn: () => getBudgetsDetails({ budgetsId }),
     enabled: open,
   })
 
@@ -63,49 +65,53 @@ export function EditIncomeModal({
     handleSubmit,
     formState: { isSubmitting },
     control,
-  } = useForm<IncomeBodySchema>({
-    resolver: zodResolver(incomeBodyForm),
+  } = useForm<BudgetsBodySchema>({
+    resolver: zodResolver(budgetsBodyForm),
     defaultValues: {
-      incomeId: result.id,
+      budgetsId: result.id,
       name: result.name ?? '',
+      data: result.data ?? '',
       valor: result.valor ?? '',
       status: result.status ?? '',
+      dataVencimento: result.dataVencimento ?? '',
     },
   })
 
-  const { mutateAsync: updateIncomeFn } = useMutation({
-    mutationFn: editIncome,
+  const { mutateAsync: updateBudgetsFn } = useMutation({
+    mutationFn: editBudgets,
     onSuccess: async () => {
-      toast.success('Renda atualizada com sucesso')
+      toast.success('Despesa atualizada com sucesso')
       onClose()
       await queryClient.invalidateQueries()
     },
     onError: () => {
-      toast.error('Falha ao atualizar a renda. Tente novamente.')
+      toast.error('Falha ao atualizar a despesa. Tente novamente.')
     },
   })
 
-  async function handleUpdateIncome(data: IncomeBodySchema) {
+  async function handleUpdateBudgets(data: BudgetsBodySchema) {
     try {
-      await updateIncomeFn({
-        incomeId: data.incomeId,
+      await updateBudgetsFn({
+        budgetsId: data.budgetsId,
         name: data.name,
         valor: data.valor,
+        data: data.data,
         status: data.status,
+        dataVencimento: data.dataVencimento,
       })
     } catch (error) {
-      toast.error('Falha ao atualizar a renda. Tente novamente.')
+      toast.error('Falha ao atualizar a despesa. Tente novamente.')
     }
   }
 
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Editar Renda</DialogTitle>
-        <DialogDescription>Painel para editar uma renda</DialogDescription>
+        <DialogTitle>Editar Despesa</DialogTitle>
+        <DialogDescription>Painel para editar uma despesa</DialogDescription>
       </DialogHeader>
 
-      <form onSubmit={handleSubmit(handleUpdateIncome)}>
+      <form onSubmit={handleSubmit(handleUpdateBudgets)}>
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right" htmlFor="name">
@@ -117,6 +123,16 @@ export function EditIncomeModal({
               Valor
             </Label>
             <Input className="col-span-3" id="valor" {...register('valor')} />
+
+            <Label className="text-right" htmlFor="date">
+              Data do Vencimento
+            </Label>
+            <Input
+              type="date"
+              className="col-span-3"
+              id="dataVencimento"
+              {...register('dataVencimento')}
+            />
 
             <Label className="text-right" htmlFor="status">
               Status
