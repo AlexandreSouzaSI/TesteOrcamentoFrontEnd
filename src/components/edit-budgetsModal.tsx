@@ -1,6 +1,6 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -50,31 +50,20 @@ export function EditBudgetsModal({
   onClose,
 }: BudgetsDetailsProps) {
   const queryClient = useQueryClient()
-  const { data: result } = useQuery({
+  const { data: result, isLoading } = useQuery({
     queryKey: ['budgets', budgetsId],
     queryFn: () => getBudgetsDetails({ budgetsId }),
     enabled: open,
   })
-
-  if (!result) {
-    return null
-  }
 
   const {
     register,
     handleSubmit,
     formState: { isSubmitting },
     control,
+    reset,
   } = useForm<BudgetsBodySchema>({
     resolver: zodResolver(budgetsBodyForm),
-    defaultValues: {
-      budgetsId: result.id,
-      name: result.name ?? '',
-      data: result.data ?? '',
-      valor: result.valor ?? '',
-      status: result.status ?? '',
-      dataVencimento: result.dataVencimento ?? '',
-    },
   })
 
   const { mutateAsync: updateBudgetsFn } = useMutation({
@@ -88,6 +77,23 @@ export function EditBudgetsModal({
       toast.error('Falha ao atualizar a despesa. Tente novamente.')
     },
   })
+
+  useEffect(() => {
+    if (result) {
+      reset({
+        budgetsId: result.id,
+        name: result.name ?? '',
+        data: result.data ?? '',
+        valor: result.valor ?? '',
+        status: result.status ?? '',
+        dataVencimento: result.dataVencimento ?? '',
+      })
+    }
+  }, [result, reset])
+
+  if (isLoading || !result) {
+    return null
+  }
 
   async function handleUpdateBudgets(data: BudgetsBodySchema) {
     try {

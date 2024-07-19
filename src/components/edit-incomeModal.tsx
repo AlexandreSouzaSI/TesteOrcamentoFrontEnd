@@ -1,6 +1,6 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -49,30 +49,20 @@ export function EditIncomeModal({
   onClose,
 }: IncomeDetailsProps) {
   const queryClient = useQueryClient()
-  const { data: result } = useQuery({
+  const { data: result, isLoading } = useQuery({
     queryKey: ['income', incomeId],
     queryFn: () => getIncomeDetails({ incomeId }),
     enabled: open,
   })
-
-  if (!result) {
-    return null
-  }
 
   const {
     register,
     handleSubmit,
     formState: { isSubmitting },
     control,
+    reset,
   } = useForm<IncomeBodySchema>({
     resolver: zodResolver(incomeBodyForm),
-    defaultValues: {
-      incomeId: result.id,
-      name: result.name ?? '',
-      valor: result.valor ?? '',
-      status: result.status ?? '',
-      data: result.data ?? '',
-    },
   })
 
   const { mutateAsync: updateIncomeFn } = useMutation({
@@ -86,6 +76,22 @@ export function EditIncomeModal({
       toast.error('Falha ao atualizar a renda. Tente novamente.')
     },
   })
+
+  useEffect(() => {
+    if (result) {
+      reset({
+        incomeId: result.id,
+        name: result.name ?? '',
+        valor: result.valor ?? '',
+        status: result.status ?? '',
+        data: result.data ?? '',
+      })
+    }
+  }, [result, reset])
+
+  if (isLoading || !result) {
+    return null
+  }
 
   async function handleUpdateIncome(data: IncomeBodySchema) {
     try {

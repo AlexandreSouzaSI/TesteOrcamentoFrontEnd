@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { HandCoins } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { getIncomeValueSum } from '@/api/get-income-valueSum'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,8 +10,15 @@ export function MonthIncomeCard() {
     queryKey: ['income'],
     queryFn: () => getIncomeValueSum({}),
   })
+
+  const navigate = useNavigate()
+
+  const handleCardClick = () => {
+    navigate(`/income`)
+  }
+
   return (
-    <Card>
+    <Card onClick={handleCardClick} className="cursor-pointer">
       <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-semibold">
           Total de Renda (mes)

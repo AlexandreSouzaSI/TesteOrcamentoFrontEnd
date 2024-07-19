@@ -17,14 +17,11 @@ export async function editBudgets({
   valor,
   dataVencimento,
 }: EditBudgetsParams) {
-  console.log(status)
-  const respose = await api.put(`/despesa/${budgetsId}`, {
+  await api.put(`/despesa/${budgetsId}`, {
     status: status || 'pago',
     data,
     name,
     valor,
     dataVencimento,
   })
-
-  console.log('resposta: ', respose.data)
 }
