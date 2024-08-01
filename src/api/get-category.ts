@@ -1,26 +1,24 @@
 import { api } from '@/lib/axios'
 
-export interface GetIncomeQuery {
+import { Despesa } from './get-budgets'
+import { Renda } from './get-income'
+
+export interface GetOrdersQuery {
   pageIndex?: number | null
   name?: string | null
-  status?: string | null
 }
 
-export interface Renda {
+interface Categoria {
   id: string
   name: string
-  data: string | null
-  valor: number
-  status: 'vencido' | 'pago' | 'normal' | 'pendente'
-  createdAt: Date
-  updatedAt: Date | null | undefined
-  userId: string
-  categoria: string
+  despesas?: Despesa[]
+  rendas?: Renda[]
+  // produtos?: Produto[]
 }
 
-export interface RendaResponse {
+export interface CategoriaResponse {
   value: {
-    renda: Renda[]
+    categoria: Categoria[]
     meta: {
       pageIndex: number
       perPage: number
@@ -30,7 +28,7 @@ export interface RendaResponse {
   }
 }
 
-export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
+export async function getCategory({ pageIndex, name }: GetOrdersQuery) {
   const token = localStorage.getItem('token')
 
   if (!token) {
@@ -41,15 +39,14 @@ export async function getIncome({ pageIndex, name, status }: GetIncomeQuery) {
     pageIndex = 1
   }
 
-  const response = await api.get<RendaResponse>(
-    `/renda?pageIndex=${pageIndex}`,
+  const response = await api.get<CategoriaResponse>(
+    `/category?pageIndex=${pageIndex}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
       params: {
         name,
-        status,
       },
     },
   )

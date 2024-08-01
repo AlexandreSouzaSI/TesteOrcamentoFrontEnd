@@ -6,7 +6,7 @@ export interface GetOrdersQuery {
   status?: string | null
 }
 
-interface Despesa {
+export interface Despesa {
   id: string
   name: string
   data: Date | null
@@ -16,6 +16,8 @@ interface Despesa {
   createdAt: Date
   updatedAt: Date | null | undefined
   userId: string
+  categoriaId: string
+  categoria: string
 }
 
 export interface DespesaResponse {
@@ -53,6 +55,8 @@ export async function getBudgets({ pageIndex, name, status }: GetOrdersQuery) {
       },
     },
   )
+
+  console.log('aqui: ', response.data.value)
 
   return response.data.value
 }

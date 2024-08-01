@@ -25,6 +25,7 @@ export interface Despesa {
   createdAt: Date
   updatedAt: Date | null | undefined
   userId: string
+  categoria: string
 }
 
 export interface DespesaTableRowProps {
@@ -111,6 +112,9 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
           </Dialog>
         </TableCell>
         <TableCell className="font-medium">{despesa.name}</TableCell>
+        <TableCell className="font-medium">
+          {despesa.categoria || '-'}
+        </TableCell>
         <TableCell className="font-medium">{`R$ ${despesa.valor.toLocaleString(
           'pt-BR',
           {
@@ -151,6 +155,7 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
           <DeleteConfirmationModal
             onConfirm={() => deleteBudgetsFn({ budgetsId: despesa.id })}
             status={despesa.status}
+            entityName="Despesa"
           />
         </TableCell>
       </TableRow>

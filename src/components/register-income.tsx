@@ -1,11 +1,24 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { getCategory } from '@/api/get-category'
 import { registerIncome } from '@/api/register-income'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 import { Button } from './ui/button'
+import { Calendar } from './ui/calendar'
 import {
   DialogClose,
   DialogContent,
@@ -27,8 +40,10 @@ import {
 const incomeBodyForm = z.object({
   name: z.string(),
   valor: z.coerce.number(),
-  status: z.string(),
-  data: z.string().optional(),
+  status: z.string().optional(),
+  userId: z.string(),
+  data: z.date().optional(),
+  categoriaId: z.string().optional(),
 })
 
 type IncomeBodySchema = z.infer<typeof incomeBodyForm>
@@ -38,6 +53,10 @@ export interface RegisterIncomeModalProps {
 }
 
 export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    [],
+  )
+  const [searchParams] = useSearchParams()
   const {
     register,
     handleSubmit,
@@ -58,15 +77,38 @@ export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
     },
   })
 
+  const name = searchParams.get('name')
+
+  const pageIndex = z.coerce
+    .number()
+    .transform((pageIndex) => pageIndex - 1)
+    .parse(searchParams.get('pageIndex') ?? '1')
+
+  const { data: result, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['category', pageIndex, name],
+    queryFn: () => getCategory({ pageIndex, name }),
+  })
+
+  useEffect(() => {
+    if (result) {
+      setCategories(result.categoria)
+    }
+  }, [result])
+
   async function handleRegisterIncome(data: IncomeBodySchema) {
     try {
       await registerIncomeFn({
         name: data.name,
         valor: data.valor,
         status: data.status,
-        data: data.data,
+        data: data.data
+          ? format(data.data, 'yyyy-MM-dd', { locale: ptBR })
+          : undefined,
+        categoriaId: data.categoriaId,
       })
-    } catch (error) {}
+    } catch (error) {
+      // A mensagem de erro já está sendo tratada pelo onError do mutateAsync
+    }
   }
 
   return (
@@ -89,14 +131,68 @@ export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
             </Label>
             <Input className="col-span-3" id="valor" {...register('valor')} />
 
-            <Label className="text-right" htmlFor="date">
+            <Label className="text-right" htmlFor="data">
               Data
             </Label>
-            <Input
-              type="date"
-              className="col-span-3"
-              id="dataVencimento"
-              {...register('data')}
+            <Controller
+              name="data"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'col-span-3 w-[240px] justify-start text-left font-normal',
+                        !value && 'text-muted-foreground',
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {value ? (
+                        format(value, 'PPP', { locale: ptBR })
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={value}
+                      onSelect={(selectedDate) => onChange(selectedDate)}
+                      initialFocus
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+
+            <Label className="text-right" htmlFor="categoria">
+              Categoria
+            </Label>
+            <Controller
+              name="categoriaId"
+              control={control}
+              render={({ field: { name, onChange, value, disabled } }) => (
+                <Select
+                  name={name}
+                  onValueChange={onChange}
+                  value={value}
+                  disabled={disabled || categoriesLoading}
+                >
+                  <SelectTrigger className="col-span-3 w-[342px]">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
 
             <Label className="text-right" htmlFor="status">
@@ -105,27 +201,24 @@ export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
             <Controller
               name="status"
               control={control}
-              render={({ field: { name, onChange, value, disabled } }) => {
-                return (
-                  <Select
-                    defaultValue="all"
-                    name={name}
-                    onValueChange={onChange}
-                    value={value}
-                    disabled={disabled}
-                  >
-                    <SelectTrigger className="w-[342px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pendente">pendente</SelectItem>
-                      <SelectItem value="pago">Pago</SelectItem>
-                      <SelectItem value="vencido">Vencido</SelectItem>
-                      <SelectItem value="hoje">Hoje</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )
-              }}
+              render={({ field: { name, onChange, value, disabled } }) => (
+                <Select
+                  name={name}
+                  onValueChange={onChange}
+                  value={value}
+                  disabled={disabled}
+                >
+                  <SelectTrigger className="col-span-3 w-[342px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="pago">Pago</SelectItem>
+                    <SelectItem value="vencido">Vencido</SelectItem>
+                    <SelectItem value="hoje">Hoje</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             />
           </div>
         </div>

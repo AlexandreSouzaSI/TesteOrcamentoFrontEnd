@@ -26,6 +26,7 @@ export interface Renda {
   createdAt: Date
   updatedAt: Date | null | undefined
   userId: string
+  categoria: string
 }
 
 export interface RendaTableRowProps {
@@ -60,7 +61,20 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
     },
   })
 
-  // Função para calcular o status visual
+  const handleStatusChange = async (newStatus: Renda['status']) => {
+    try {
+      await editIncomeFn({
+        incomeId: income.id,
+        status: newStatus,
+        data: income.data,
+      })
+      queryClient.invalidateQueries()
+      toast.success('Status atualizado com sucesso.')
+    } catch (error) {
+      toast.error('Falha ao atualizar o status. Tente novamente.')
+    }
+  }
+
   const getStatus = () => {
     if (income.data) {
       if (isDateToday(income.data) && income.status !== 'pago') {
@@ -78,16 +92,6 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
       }
     }
     return income.status || 'pendente'
-  }
-
-  const handleStatusChange = async (newStatus: Renda['status']) => {
-    try {
-      await editIncomeFn({ incomeId: income.id, status: newStatus })
-      queryClient.invalidateQueries()
-      toast.success('Status atualizado com sucesso.')
-    } catch (error) {
-      toast.error('Falha ao atualizar o status. Tente novamente.')
-    }
   }
 
   useEffect(() => {
@@ -108,10 +112,13 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
                 <span className="sr-only">Detalhes da renda</span>
               </Button>
             </DialogTrigger>
-            <IncomeDetails open={isDetailsOpen} incomeId={income.id} />
+            {isDetailsOpen && (
+              <IncomeDetails open={isDetailsOpen} incomeId={income.id} />
+            )}
           </Dialog>
         </TableCell>
         <TableCell className="font-medium">{income.name}</TableCell>
+        <TableCell className="font-medium">{income.categoria || '-'}</TableCell>
         <TableCell className="font-medium">{`R$ ${income.valor.toLocaleString(
           'pt-BR',
           {
@@ -166,6 +173,7 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
           <DeleteConfirmationModal
             onConfirm={() => deleteIncomeFn({ incomeId: income.id })}
             status={income.status}
+            entityName="Renda"
           />
         </TableCell>
       </TableRow>

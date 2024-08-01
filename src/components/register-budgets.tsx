@@ -1,11 +1,23 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { getCategory } from '@/api/get-category' // Importar a função para buscar categorias
 import { registerBudgets } from '@/api/register-budgets'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 import { Button } from './ui/button'
+import { Calendar } from './ui/calendar'
 import {
   DialogClose,
   DialogContent,
@@ -24,12 +36,14 @@ import {
   SelectValue,
 } from './ui/select'
 
+// Atualizar o schema para incluir a categoria
 const budgetsBodyForm = z.object({
   name: z.string(),
   valor: z.coerce.number(),
   status: z.string().optional(),
   userId: z.string(),
-  dataVencimento: z.string().optional(),
+  dataVencimento: z.date().optional(),
+  categoriaId: z.string().optional(),
 })
 
 type BudgetsBodySchema = z.infer<typeof budgetsBodyForm>
@@ -39,6 +53,10 @@ export interface RegisterBudgetsModalProps {
 }
 
 export function RegisterBudgetsModal({ onClose }: RegisterBudgetsModalProps) {
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    [],
+  )
+
   const {
     register,
     handleSubmit,
@@ -59,13 +77,27 @@ export function RegisterBudgetsModal({ onClose }: RegisterBudgetsModalProps) {
     },
   })
 
+  const { data: result, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['category'],
+    queryFn: () => getCategory({ pageIndex: 0, name: '' }),
+  })
+
+  useEffect(() => {
+    if (result) {
+      setCategories(result.categoria)
+    }
+  }, [result])
+
   async function handleRegisterBudgets(data: BudgetsBodySchema) {
     try {
       await registerBudgetsFn({
         name: data.name,
         valor: data.valor,
         status: data.status,
-        dataVencimento: data.dataVencimento,
+        dataVencimento: data.dataVencimento
+          ? format(data.dataVencimento, 'yyyy-MM-dd')
+          : undefined,
+        categoriaId: data.categoriaId,
       })
     } catch (error) {
       // A mensagem de erro já está sendo tratada pelo onError do mutateAsync
@@ -95,11 +127,65 @@ export function RegisterBudgetsModal({ onClose }: RegisterBudgetsModalProps) {
             <Label className="text-right" htmlFor="dataVencimento">
               Data Vencimento
             </Label>
-            <Input
-              type="date"
-              className="col-span-3"
-              id="dataVencimento"
-              {...register('dataVencimento')}
+            <Controller
+              name="dataVencimento"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'col-span-3 w-[240px] justify-start text-left font-normal',
+                        !value && 'text-muted-foreground',
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {value ? (
+                        format(value, 'PPP', { locale: ptBR })
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={value}
+                      onSelect={(selectedDate) => onChange(selectedDate)}
+                      initialFocus
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+
+            <Label className="text-right" htmlFor="categoria">
+              Categoria
+            </Label>
+            <Controller
+              name="categoriaId"
+              control={control}
+              render={({ field: { name, onChange, value, disabled } }) => (
+                <Select
+                  name={name}
+                  onValueChange={onChange}
+                  value={value}
+                  disabled={disabled || categoriesLoading}
+                >
+                  <SelectTrigger className="col-span-3 w-[342px]">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
 
             <Label className="text-right" htmlFor="status">

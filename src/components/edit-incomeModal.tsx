@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { editIncome } from '@/api/edit-income'
+import { getCategory } from '@/api/get-category'
 import { getIncomeDetails } from '@/api/get-income-details'
 
 import { Button } from './ui/button'
@@ -33,6 +34,7 @@ const incomeBodyForm = z.object({
   valor: z.coerce.number().optional(),
   status: z.string().optional(),
   data: z.string().optional(),
+  categoriaId: z.string().optional(),
 })
 
 type IncomeBodySchema = z.infer<typeof incomeBodyForm>
@@ -49,9 +51,19 @@ export function EditIncomeModal({
   onClose,
 }: IncomeDetailsProps) {
   const queryClient = useQueryClient()
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    [],
+  )
+
   const { data: result, isLoading } = useQuery({
     queryKey: ['income', incomeId],
     queryFn: () => getIncomeDetails({ incomeId }),
+    enabled: open,
+  })
+
+  const { data: categoryResult, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['category'],
+    queryFn: () => getCategory({ pageIndex: 0, name: '' }),
     enabled: open,
   })
 
@@ -85,9 +97,16 @@ export function EditIncomeModal({
         valor: result.valor ?? '',
         status: result.status ?? '',
         data: result.data ?? '',
+        categoriaId: result.categoriaId ?? '',
       })
     }
   }, [result, reset])
+
+  useEffect(() => {
+    if (categoryResult) {
+      setCategories(categoryResult.categoria)
+    }
+  }, [categoryResult])
 
   if (isLoading || !result) {
     return null
@@ -101,6 +120,7 @@ export function EditIncomeModal({
         valor: data.valor,
         status: data.status,
         data: data.data,
+        categoriaId: data.categoriaId,
       })
     } catch (error) {
       toast.error('Falha ao atualizar a renda. Tente novamente.')
@@ -135,6 +155,33 @@ export function EditIncomeModal({
               className="col-span-3"
               id="data"
               {...register('data')}
+            />
+
+            <Label className="text-right" htmlFor="categoria">
+              Categoria
+            </Label>
+            <Controller
+              name="categoriaId"
+              control={control}
+              render={({ field: { name, onChange, value, disabled } }) => (
+                <Select
+                  name={name}
+                  onValueChange={onChange}
+                  value={value}
+                  disabled={disabled || categoriesLoading}
+                >
+                  <SelectTrigger className="col-span-3 w-[342px]">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
 
             <Label className="text-right" htmlFor="status">

@@ -7,6 +7,7 @@ export interface EditBudgetsParams {
   valor?: number
   status?: string
   dataVencimento?: string
+  categoriaId?: string | null
 }
 
 export async function editBudgets({
@@ -16,6 +17,7 @@ export async function editBudgets({
   name,
   valor,
   dataVencimento,
+  categoriaId,
 }: EditBudgetsParams) {
   await api.put(`/despesa/${budgetsId}`, {
     status: status || 'pago',
@@ -23,5 +25,6 @@ export async function editBudgets({
     name,
     valor,
     dataVencimento,
+    categoriaId,
   })
 }

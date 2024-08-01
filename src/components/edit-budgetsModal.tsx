@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { editBudgets } from '@/api/edit-budgets'
 import { getBudgetsDetails } from '@/api/get-budgets-details'
+import { getCategory } from '@/api/get-category'
 
 import { Button } from './ui/button'
 import {
@@ -34,6 +35,7 @@ const budgetsBodyForm = z.object({
   valor: z.coerce.number().optional(),
   status: z.string().optional(),
   dataVencimento: z.string().optional(),
+  categoriaId: z.string().optional(),
 })
 
 type BudgetsBodySchema = z.infer<typeof budgetsBodyForm>
@@ -50,9 +52,19 @@ export function EditBudgetsModal({
   onClose,
 }: BudgetsDetailsProps) {
   const queryClient = useQueryClient()
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    [],
+  )
+
   const { data: result, isLoading } = useQuery({
     queryKey: ['budgets', budgetsId],
     queryFn: () => getBudgetsDetails({ budgetsId }),
+    enabled: open,
+  })
+
+  const { data: categoryResult, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['category'],
+    queryFn: () => getCategory({ pageIndex: 0, name: '' }),
     enabled: open,
   })
 
@@ -87,9 +99,16 @@ export function EditBudgetsModal({
         valor: result.valor ?? '',
         status: result.status ?? '',
         dataVencimento: result.dataVencimento ?? '',
+        categoriaId: result.categoriaId ?? '', // Atualizar categoriaId
       })
     }
   }, [result, reset])
+
+  useEffect(() => {
+    if (categoryResult) {
+      setCategories(categoryResult.categoria)
+    }
+  }, [categoryResult])
 
   if (isLoading || !result) {
     return null
@@ -104,6 +123,7 @@ export function EditBudgetsModal({
         data: data.data,
         status: data.status,
         dataVencimento: data.dataVencimento,
+        categoriaId: data.categoriaId,
       })
     } catch (error) {
       toast.error('Falha ao atualizar a despesa. Tente novamente.')
@@ -130,7 +150,7 @@ export function EditBudgetsModal({
             </Label>
             <Input className="col-span-3" id="valor" {...register('valor')} />
 
-            <Label className="text-right" htmlFor="date">
+            <Label className="text-right" htmlFor="dataVencimento">
               Data do Vencimento
             </Label>
             <Input
@@ -138,6 +158,33 @@ export function EditBudgetsModal({
               className="col-span-3"
               id="dataVencimento"
               {...register('dataVencimento')}
+            />
+
+            <Label className="text-right" htmlFor="categoriaId">
+              Categoria
+            </Label>
+            <Controller
+              name="categoriaId"
+              control={control}
+              render={({ field: { name, onChange, value, disabled } }) => (
+                <Select
+                  name={name}
+                  onValueChange={onChange}
+                  value={value}
+                  disabled={disabled || categoriesLoading}
+                >
+                  <SelectTrigger className="col-span-3 w-[342px]">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
 
             <Label className="text-right" htmlFor="status">

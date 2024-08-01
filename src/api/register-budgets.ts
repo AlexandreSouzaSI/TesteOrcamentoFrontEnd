@@ -5,6 +5,7 @@ export interface RegisterBudgetsBody {
   valor: number
   status?: string | null
   dataVencimento?: string | null
+  categoriaId?: string | null
 }
 
 export async function registerBudgets({
@@ -12,11 +13,13 @@ export async function registerBudgets({
   valor,
   status,
   dataVencimento,
+  categoriaId,
 }: RegisterBudgetsBody) {
   await api.post('/despesa', {
     name,
     valor,
     status,
     dataVencimento,
+    categoriaId,
   })
 }

@@ -1,4 +1,10 @@
-import { BadgeDollarSign, HandCoins, Home, NotebookPen } from 'lucide-react'
+import {
+  BadgeDollarSign,
+  HandCoins,
+  Home,
+  NotebookPen,
+  Package,
+} from 'lucide-react'
 
 import { AccountFinance } from './account-finance'
 import { NavLink } from './nav-link'
@@ -23,7 +29,11 @@ export function Header() {
           </NavLink>
           <NavLink to="/income">
             <HandCoins className="h-4 w-4" />
-            Renda
+            Rendas
+          </NavLink>
+          <NavLink to="/category">
+            <Package className="h-4 w-4" />
+            Categorias
           </NavLink>
         </nav>
         <div className="ml-auto flex items-center gap-2">

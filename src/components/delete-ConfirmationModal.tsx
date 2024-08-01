@@ -14,15 +14,17 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 
-export interface BudgetsConfirmProps {
+export interface DeleteConfirmationModalProps {
   onConfirm: () => void
-  status: string
+  entityName: string
+  status?: string
 }
 
 export function DeleteConfirmationModal({
   onConfirm,
+  entityName,
   status,
-}: BudgetsConfirmProps) {
+}: DeleteConfirmationModalProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleConfirm = () => {
@@ -36,7 +38,7 @@ export function DeleteConfirmationModal({
         <Button
           variant="ghost"
           size="xs"
-          disabled={!['vencido', 'normal', 'pendente'].includes(status)}
+          disabled={status ? !['pendente'].includes(status) : false}
         >
           <Trash2 className="mr-2 h-3 w-3 fill-red-400" />
           Excluir
@@ -46,7 +48,7 @@ export function DeleteConfirmationModal({
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza de que deseja excluir esta despesa?
+            Tem certeza de que deseja excluir esta {entityName}?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

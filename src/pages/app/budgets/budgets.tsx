@@ -28,7 +28,7 @@ export function Budgets() {
     .transform((pageIndex) => pageIndex - 1)
     .parse(searchParams.get('pageIndex') ?? '1')
 
-  const { data: result, isLoading: isLoadingBudgets } = useQuery({
+  const { data: result } = useQuery({
     queryKey: ['budgets', pageIndex, name, status],
     queryFn: () => getBudgets({ pageIndex, name, status }),
   })
@@ -38,10 +38,6 @@ export function Budgets() {
       prev.set('pageIndex', (pageIndex + 1).toString())
       return prev
     })
-  }
-
-  if (isLoadingBudgets) {
-    return <div>Loading...</div>
   }
 
   return (
@@ -56,7 +52,8 @@ export function Budgets() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[64px]"></TableHead>
-                  <TableHead>Nome</TableHead>
+                  <TableHead className="w-[264px]">Nome</TableHead>
+                  <TableHead>Categoria</TableHead>
                   <TableHead className="w-[240px]">Valor</TableHead>
                   <TableHead className="w-[240px]">
                     Data de Vencimento

@@ -14,6 +14,7 @@ export interface GetIncomeDetailsResponse {
     createdAt: Date
     updatedAt: Date | null | undefined
     userId: string
+    categoriaId?: string | null
   }
 }
 
