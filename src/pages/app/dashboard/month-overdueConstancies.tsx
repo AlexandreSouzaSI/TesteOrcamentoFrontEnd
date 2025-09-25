@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { HandCoins } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { getBudgetsValueSumStatus } from '@/api/get-budgetsValueSumStatus'
+import { getBudgetsValueSumStatus } from '@/api/budgets/get-budgetsValueSumStatus'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function MonthOverdueConstanciesCard() {

@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { getIncome } from '@/api/get-income'
+import { getIncome } from '@/api/income/get-income'
 import { Pagination } from '@/components/pagination'
 import {
   Table,
@@ -44,7 +44,7 @@ export function Income() {
     <>
       <Helmet title="Renda" />
       <div className="flex flex-col gap-4 p-10">
-        <h1 className="text-3xl font-bold tracking-tight">Renda</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Receitas</h1>
         <div className="space-y-2.5">
           <IncomeTableFilters />
           <div className="rounded-md border">
@@ -70,7 +70,7 @@ export function Income() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} className="py-4 text-center">
-                      Nenhuma renda encontrada.
+                      Nenhuma receita encontrada.
                     </TableCell>
                   </TableRow>
                 )}

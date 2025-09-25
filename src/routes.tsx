@@ -9,6 +9,8 @@ import { Dashboard } from './pages/app/dashboard/dashboard'
 import { Income } from './pages/app/income/income'
 import { SignIn } from './pages/auth/sign-in'
 import { SignUp } from './pages/auth/sign-up'
+import { Product } from './pages/app/product/product'
+import { Cost } from './pages/app/cost/cost'
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +22,8 @@ export const router = createBrowserRouter([
       { path: '/budgets', element: <Budgets /> },
       { path: '/income', element: <Income /> },
       { path: '/category', element: <Category /> },
+      { path: '/product', element: <Product /> },
+      { path: '/costs', element: <Cost /> },
     ],
   },
   {

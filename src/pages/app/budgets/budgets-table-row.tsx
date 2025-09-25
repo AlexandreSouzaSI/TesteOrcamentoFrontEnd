@@ -4,8 +4,8 @@ import { Check, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import { deleteBudgets } from '@/api/delete-budgets'
-import { editBudgets } from '@/api/edit-budgets'
+import { deleteBudgets } from '@/api/budgets/delete-budgets'
+import { editBudgets } from '@/api/budgets/edit-budgets'
 import { DeleteConfirmationModal } from '@/components/delete-ConfirmationModal'
 import { Status } from '@/components/status'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,8 @@ export interface Despesa {
   updatedAt: Date | null | undefined
   userId: string
   categoria: string
+  quantidade: number | null
+  valorUnitario: number | null
 }
 
 export interface DespesaTableRowProps {
@@ -41,7 +43,7 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
     mutationFn: deleteBudgets,
     onSuccess: () => {
       queryClient.invalidateQueries()
-      toast.success('Despesa excluída com sucesso.')
+      toast.success('Custo excluído com sucesso.')
     },
     onError: () => {
       toast.error('Falha ao excluir a despesa. Tente novamente.')
@@ -52,10 +54,10 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
     mutationFn: editBudgets,
     onSuccess: () => {
       queryClient.invalidateQueries()
-      toast.success('Despesa editada com sucesso.')
+      toast.success('Custo editado com sucesso.')
     },
     onError: () => {
-      toast.error('Falha ao editar a despesa. Tente novamente.')
+      toast.error('Falha ao editar o custo. Tente novamente.')
     },
   })
 
@@ -115,6 +117,17 @@ export function BudgetsTableRow({ despesa }: DespesaTableRowProps) {
         <TableCell className="font-medium">
           {despesa.categoria || '-'}
         </TableCell>
+        <TableCell className="font-medium">
+          {despesa.quantidade ? despesa.quantidade : '-'}
+        </TableCell>
+        <TableCell className="font-medium">{`${
+          despesa.valorUnitario
+            ? despesa.valorUnitario?.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })
+            : '-'
+        }`}</TableCell>
         <TableCell className="font-medium">{`R$ ${despesa.valor.toLocaleString(
           'pt-BR',
           {

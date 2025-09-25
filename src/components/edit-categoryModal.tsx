@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { editCategory } from '@/api/edit-category'
-import { getCategoryDetails } from '@/api/get-category-details'
+import { editCategory } from '@/api/category/edit-category'
+import { getCategoryDetails } from '@/api/category/get-category-details'
 
 import { Button } from './ui/button'
 import {

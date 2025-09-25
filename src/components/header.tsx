@@ -1,5 +1,7 @@
 import {
   BadgeDollarSign,
+  BookOpenCheck,
+  FolderOpen,
   HandCoins,
   Home,
   NotebookPen,
@@ -25,15 +27,23 @@ export function Header() {
           </NavLink>
           <NavLink to="/budgets">
             <NotebookPen className="h-4 w-4" />
-            Orcamentos
+            Custos
           </NavLink>
           <NavLink to="/income">
             <HandCoins className="h-4 w-4" />
-            Rendas
+            Receitas
           </NavLink>
           <NavLink to="/category">
-            <Package className="h-4 w-4" />
+            <FolderOpen className="h-4 w-4" />
             Categorias
+          </NavLink>
+          <NavLink to="/costs">
+            <BookOpenCheck className="h-4 w-4" />
+            Despesas
+          </NavLink>
+          <NavLink to="/product">
+            <Package className="h-4 w-4" />
+            Estoque
           </NavLink>
         </nav>
         <div className="ml-auto flex items-center gap-2">

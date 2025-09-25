@@ -1,7 +1,7 @@
 import { DialogTitle } from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 
-import { getCategoryDetails } from '@/api/get-category-details'
+import { getCategoryDetails } from '@/api/category/get-category-details'
 import {
   DialogContent,
   DialogDescription,

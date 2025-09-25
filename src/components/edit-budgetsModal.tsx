@@ -5,9 +5,9 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { editBudgets } from '@/api/edit-budgets'
-import { getBudgetsDetails } from '@/api/get-budgets-details'
-import { getCategory } from '@/api/get-category'
+import { editBudgets } from '@/api/budgets/edit-budgets'
+import { getBudgetsDetails } from '@/api/budgets/get-budgets-details'
+import { getCategory } from '@/api/category/get-category'
 
 import { Button } from './ui/button'
 import {
@@ -27,6 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select'
+import { formatValue } from '@/lib/formatValue'
+import { format } from 'date-fns'
 
 const budgetsBodyForm = z.object({
   budgetsId: z.string(),
@@ -36,6 +38,9 @@ const budgetsBodyForm = z.object({
   status: z.string().optional(),
   dataVencimento: z.string().optional(),
   categoriaId: z.string().optional(),
+  produtoId: z.string().optional(),
+  quantidade: z.coerce.number().optional(),
+  valorUnitario: z.coerce.number().optional(),
 })
 
 type BudgetsBodySchema = z.infer<typeof budgetsBodyForm>
@@ -99,7 +104,10 @@ export function EditBudgetsModal({
         valor: result.valor ?? '',
         status: result.status ?? '',
         dataVencimento: result.dataVencimento ?? '',
-        categoriaId: result.categoriaId ?? '', // Atualizar categoriaId
+        categoriaId: result.categoriaId ?? '',
+        produtoId: result.produtoId ?? '',
+        quantidade: result.quantidade ?? 0,
+        valorUnitario: result.valorUnitario ?? 0,
       })
     }
   }, [result, reset])
@@ -115,6 +123,16 @@ export function EditBudgetsModal({
   }
 
   async function handleUpdateBudgets(data: BudgetsBodySchema) {
+    const quantidade = formatValue(data.quantidade ?? '0');
+    const valorUnitario = formatValue(data.valorUnitario ?? '0');
+    let valor = formatValue(data.valor);
+
+    console.log("valorUnitario: ", valorUnitario)
+  
+    if (quantidade && valorUnitario) {
+      valor = quantidade * valorUnitario;
+    }
+
     try {
       await updateBudgetsFn({
         budgetsId: data.budgetsId,
@@ -122,8 +140,13 @@ export function EditBudgetsModal({
         valor: data.valor,
         data: data.data,
         status: data.status,
-        dataVencimento: data.dataVencimento,
+        dataVencimento: data.dataVencimento
+          ? format(data.dataVencimento, 'yyyy-MM-dd')
+          : undefined,
         categoriaId: data.categoriaId,
+        produtoId: data.produtoId,
+        quantidade: data.quantidade,
+        valorUnitario: data.valorUnitario,
       })
     } catch (error) {
       toast.error('Falha ao atualizar a despesa. Tente novamente.')
@@ -144,6 +167,16 @@ export function EditBudgetsModal({
               Nome
             </Label>
             <Input className="col-span-3" id="name" {...register('name')} />
+
+            <Label className="text-right" htmlFor="name">
+              Quantidade
+            </Label>
+            <Input className="col-span-3" id="name" {...register('quantidade')} />
+
+            <Label className="text-right" htmlFor="name">
+              Valor Unitario
+            </Label>
+            <Input className="col-span-3" id="name" {...register('valorUnitario')} />
 
             <Label className="text-right" htmlFor="valor">
               Valor

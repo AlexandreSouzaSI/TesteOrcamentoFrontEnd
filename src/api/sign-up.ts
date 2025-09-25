@@ -11,6 +11,7 @@ export async function registerUser({
   email,
   password,
 }: RegisterUserBody) {
+  console.log('aqui: ', name, email, password)
   await api.post('/accounts', {
     name,
     email,

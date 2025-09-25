@@ -83,7 +83,7 @@ export function IncomeTableFilters() {
         >
           <span className="text-sm font-semibold">Filtros</span>
           <Input
-            placeholder="Nome da Renda"
+            placeholder="Nome da Receita"
             className="h-8 w-[320px]"
             {...register('name')}
           />
@@ -136,7 +136,7 @@ export function IncomeTableFilters() {
             size="xs"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Adicionar Renda
+            Adicionar Receita
           </Button>
         </DialogTrigger>
       </div>

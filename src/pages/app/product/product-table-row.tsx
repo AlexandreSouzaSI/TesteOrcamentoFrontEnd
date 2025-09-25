@@ -4,69 +4,75 @@ import { Search } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { deleteCategory } from '@/api/category/delete-category'
+import { deleteProduct } from '@/api/product/delete-product'
 import { DeleteConfirmationModal } from '@/components/delete-ConfirmationModal'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { TableCell, TableRow } from '@/components/ui/table'
 
-import { CategoryDetails } from './category-details'
-import { CategoryEdit } from './category-edit'
+import { ProductDetails } from './product-details'
+import { ProductEdit } from './product-edit'
 
-export interface Categoria {
+export interface Produto {
   id: string
   name: string
+  quantidadeEstoque?: number
+  quantidadeMinima?: number
+  categoria: string
 }
 
-export interface CategoriaTableRowProps {
-  categoria: Categoria
+export interface ProdutoTableRowProps {
+  produto: Produto
 }
 
-export function CategoryTableRow({ categoria }: CategoriaTableRowProps) {
+export function ProductTableRow({ produto }: ProdutoTableRowProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
   const queryClient = useQueryClient()
 
-  const { mutateAsync: deleteCategoryFn } = useMutation({
-    mutationFn: deleteCategory,
+  const { mutateAsync: deleteProductFn } = useMutation({
+    mutationFn: deleteProduct,
     onSuccess: () => {
       queryClient.invalidateQueries()
-      toast.success('Categoria excluída com sucesso.')
+      toast.success('Produto excluído com sucesso.')
     },
     onError: () => {
-      toast.error('Falha ao excluir a categoria. Tente novamente.')
+      toast.error('Falha ao excluir o produto. Tente novamente.')
     },
   })
 
   return (
     <>
-      <TableRow key={categoria.id}>
+      <TableRow key={produto.id}>
         <TableCell>
           <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="xs">
                 <Search className="h-3 w-3" />
-                <span className="sr-only">Detalhes da Caregoria</span>
+                <span className="sr-only">Detalhes do produto</span>
               </Button>
             </DialogTrigger>
             {isDetailsOpen && (
-              <CategoryDetails
-                open={isDetailsOpen}
-                categoriaId={categoria.id}
-              />
+              <ProductDetails open={isDetailsOpen} produtoId={produto.id} />
             )}
           </Dialog>
         </TableCell>
-        <TableCell className="font-medium">{categoria.name}</TableCell>
-        <TableCell className="font-medium">{/* categoria.dre */}</TableCell>
+        <TableCell className="font-medium">{produto.name}</TableCell>
+        <TableCell className="font-medium">{produto.categoria}</TableCell>
+        <TableCell className="font-medium">
+          {produto.quantidadeMinima}
+        </TableCell>
+        <TableCell className="font-medium">
+          {produto.quantidadeEstoque}
+        </TableCell>
         <TableCell>
-          <CategoryEdit categoria={categoria} />
+          <ProductEdit produto={produto} />
         </TableCell>
         <TableCell>
           <DeleteConfirmationModal
-            onConfirm={() => deleteCategoryFn({ categoriaId: categoria.id })}
+            onConfirm={() => deleteProductFn({ productId: produto.id })}
             status={''}
-            entityName="Categoria"
+            entityName="Produto"
           />
         </TableCell>
       </TableRow>

@@ -8,8 +8,8 @@ import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { getCategory } from '@/api/get-category'
-import { registerIncome } from '@/api/register-income'
+import { getCategory } from '@/api/category/get-category'
+import { registerIncome } from '@/api/income/register-income'
 import {
   Popover,
   PopoverContent,
@@ -68,12 +68,12 @@ export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
   const { mutateAsync: registerIncomeFn } = useMutation({
     mutationFn: registerIncome,
     onSuccess: async () => {
-      toast.success('Renda criada com sucesso')
+      toast.success('Receita criada com sucesso')
       await queryClient.invalidateQueries()
       onClose()
     },
     onError: () => {
-      toast.error('Falha ao criar uma renda. Tente novamente.')
+      toast.error('Falha ao criar uma receita. Tente novamente.')
     },
   })
 
@@ -114,8 +114,8 @@ export function RegisterIncomeModal({ onClose }: RegisterIncomeModalProps) {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Cadastrar Renda</DialogTitle>
-        <DialogDescription>Painel para adicionar uma renda</DialogDescription>
+        <DialogTitle>Cadastrar Receita</DialogTitle>
+        <DialogDescription>Painel para adicionar uma receita</DialogDescription>
       </DialogHeader>
 
       <form onSubmit={handleSubmit(handleRegisterIncome)}>

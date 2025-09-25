@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { getCategory } from '@/api/category/get-category'
+import { getCosts } from '@/api/costs/get-costs'
 import { Pagination } from '@/components/pagination'
 import {
   Table,
@@ -14,13 +14,14 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-import { CategoryTableFilters } from './category-table-filters'
-import { CategoryTableRow } from './category-table-row'
+import { CostTableFilters } from './cost-table-filters'
+import { CostTableRow } from './cost-table-row'
 
-export function Category() {
+export function Cost() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const name = searchParams.get('name')
+  // const descricao = searchParams.get('descricao')
 
   const pageIndex = z.coerce
     .number()
@@ -28,8 +29,8 @@ export function Category() {
     .parse(searchParams.get('pageIndex') ?? '1')
 
   const { data: result } = useQuery({
-    queryKey: ['category', pageIndex, name],
-    queryFn: () => getCategory({ pageIndex, name }),
+    queryKey: ['costs', pageIndex, name],
+    queryFn: () => getCosts({ pageIndex, name }),
   })
 
   function handlePaginate(pageIndex: number) {
@@ -41,34 +42,32 @@ export function Category() {
 
   return (
     <div>
-      <Helmet title="Categorias" />
+      <Helmet title="Custos" />
       <div className="flex flex-col gap-4 p-10">
-        <h1 className="text-3xl font-bold tracking-tight">Categorias</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Custos</h1>
         <div className="space-y-2.5">
-          <CategoryTableFilters />
+          <CostTableFilters />
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[84px]"></TableHead>
-                  <TableHead className="w-[430px]">Nome</TableHead>
-                  <TableHead className="w-[430px]">Linha da DRE</TableHead>
+                  <TableHead className="w-[64px]"></TableHead>
+                  <TableHead className="w-[232px]">Nome</TableHead>
+                  <TableHead className="w-[232px]">Categoria</TableHead>
+                  <TableHead className="w-[232px]">Descrição</TableHead>
                   <TableHead className="w-[132px]"></TableHead>
                   <TableHead className="w-[132px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {result?.categoria && result.categoria.length > 0 ? (
-                  result.categoria.map((categoria) => (
-                    <CategoryTableRow
-                      key={categoria.id}
-                      categoria={categoria}
-                    />
+                {result?.custo && result.custo.length > 0 ? (
+                  result.custo.map((custo) => (
+                    <CostTableRow key={custo.id} custo={custo} />
                   ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} className="py-4 text-center">
-                      Nenhuma despesa encontrada.
+                      Nenhum custo encontrado.
                     </TableCell>
                   </TableRow>
                 )}

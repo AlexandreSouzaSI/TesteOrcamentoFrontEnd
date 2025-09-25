@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { registerCategory } from '@/api/register-category'
+import { registerCategory } from '@/api/category/register-category'
 
 import { Button } from './ui/button'
 import {

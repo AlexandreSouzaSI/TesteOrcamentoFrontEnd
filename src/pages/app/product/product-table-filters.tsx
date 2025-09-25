@@ -1,57 +1,40 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Search } from 'lucide-react'
 import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
+import { RegisterProductModal } from '@/components/register-product'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { RegisterBudgetsModal } from '@/components/register-budgets1'
 
-const budgetsFilterSchema = z.object({
+const productFilterSchema = z.object({
   name: z.string().optional(),
-  status: z.string().optional(),
 })
 
-type BudgetsFilterSchema = z.infer<typeof budgetsFilterSchema>
+type ProductFilterSchema = z.infer<typeof productFilterSchema>
 
-export function BudgetsTableFilters() {
+export function ProductTableFilters() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
 
   const name = searchParams.get('name')
-  const status = searchParams.get('status')
 
-  const { register, handleSubmit, control, reset } =
-    useForm<BudgetsFilterSchema>({
-      resolver: zodResolver(budgetsFilterSchema),
-      defaultValues: {
-        name: name ?? '',
-        status: status ?? '',
-      },
-    })
+  const { register, handleSubmit, reset } = useForm<ProductFilterSchema>({
+    resolver: zodResolver(productFilterSchema),
+    defaultValues: {
+      name: name ?? '',
+    },
+  })
 
-  function handleFilter({ name, status }: BudgetsFilterSchema) {
+  function handleFilter({ name }: ProductFilterSchema) {
     setSearchParams((state) => {
       if (name) {
         state.set('name', name)
       } else {
         state.delete('name')
-      }
-
-      if (status) {
-        state.set('status', status)
-      } else {
-        state.delete('status')
       }
 
       state.set('page', '1')
@@ -63,7 +46,6 @@ export function BudgetsTableFilters() {
   function handleClearFilters() {
     setSearchParams((state) => {
       state.delete('name')
-      state.delete('status')
       state.set('page', '1')
 
       return state
@@ -71,7 +53,6 @@ export function BudgetsTableFilters() {
 
     reset({
       name: '',
-      status: '',
     })
   }
 
@@ -84,34 +65,10 @@ export function BudgetsTableFilters() {
         >
           <span className="text-sm font-semibold">Filtros</span>
           <Input
-            placeholder="Nome do Orçamento"
+            placeholder="Nome do Produto"
             className="h-8 w-[320px]"
             {...register('name')}
           />
-          <Controller
-            name="status"
-            control={control}
-            render={({ field: { name, onChange, value, disabled } }) => (
-              <Select
-                defaultValue="all"
-                name={name}
-                onValueChange={onChange}
-                value={value}
-                disabled={disabled}
-              >
-                <SelectTrigger className="h-8 w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="pago">Pago</SelectItem>
-                  <SelectItem value="vencido">Vencido</SelectItem>
-                  <SelectItem value="hoje">Hoje</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
-
           <Button type="submit" variant="secondary" size="xs">
             <Search className="mr-2 h-4 w-4" />
             Filtrar resultados
@@ -135,11 +92,11 @@ export function BudgetsTableFilters() {
             size="xs"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Adicionar Orçamento
+            Adicionar Produto
           </Button>
         </DialogTrigger>
       </div>
-      <RegisterBudgetsModal onClose={() => setIsRegisterOpen(false)} />
+      <RegisterProductModal onClose={() => setIsRegisterOpen(false)} />
     </Dialog>
   )
 }

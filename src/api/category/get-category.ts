@@ -1,7 +1,7 @@
 import { api } from '@/lib/axios'
 
-import { Despesa } from './get-budgets'
-import { Renda } from './get-income'
+import { Despesa } from '../budgets/get-budgets'
+import { Renda } from '../income/get-income'
 
 export interface GetOrdersQuery {
   pageIndex?: number | null
@@ -11,6 +11,7 @@ export interface GetOrdersQuery {
 interface Categoria {
   id: string
   name: string
+  produto: string
   despesas?: Despesa[]
   rendas?: Renda[]
   // produtos?: Produto[]

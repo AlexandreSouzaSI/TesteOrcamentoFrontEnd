@@ -16,6 +16,9 @@ export interface GetDespesaDetailsResponse {
     updatedAt: Date | null | undefined
     userId: string
     categoriaId?: string | null
+    quantidade?: number | null
+    valorUnitario?: number | null
+    produtoId?: string
   }
 }
 

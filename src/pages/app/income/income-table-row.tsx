@@ -5,8 +5,8 @@ import { Check, FilePenIcon, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import { deleteIncome } from '@/api/delete-income'
-import { editIncome } from '@/api/edit-income'
+import { deleteIncome } from '@/api/income/delete-income'
+import { editIncome } from '@/api/income/edit-income'
 import { DeleteConfirmationModal } from '@/components/delete-ConfirmationModal'
 import { EditIncomeModal } from '@/components/edit-incomeModal'
 import { Status } from '@/components/status'
@@ -109,7 +109,7 @@ export function IncomeTableRow({ income }: RendaTableRowProps) {
             <DialogTrigger asChild>
               <Button variant="outline" size="xs">
                 <Search className="h-3 w-3" />
-                <span className="sr-only">Detalhes da renda</span>
+                <span className="sr-only">Detalhes da receita</span>
               </Button>
             </DialogTrigger>
             {isDetailsOpen && (

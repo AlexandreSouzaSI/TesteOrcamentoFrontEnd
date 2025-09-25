@@ -1,7 +1,7 @@
 import { DialogTitle } from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 
-import { getBudgetsDetails } from '@/api/get-budgets-details'
+import { getBudgetsDetails } from '@/api/budgets/get-budgets-details'
 import { Status } from '@/components/status'
 import {
   DialogContent,
@@ -50,6 +50,31 @@ export function BusgetsDetails({ budgetsId, open }: BudgetsDetailsProps) {
             <TableRow>
               <TableCell className="text-muted-foreground">Nome</TableCell>
               <TableCell className="flex justify-end">{budgets.name}</TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell className="text-muted-foreground">
+                Quantidade
+              </TableCell>
+              <TableCell className="flex justify-end">
+                {budgets.quantidade ? budgets.quantidade : '-'}
+              </TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell className="text-muted-foreground">
+                Valor Unitario
+              </TableCell>
+              <TableCell className="flex justify-end">
+                {`R$ ${
+                  budgets.valorUnitario
+                    ? budgets.valorUnitario?.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      })
+                    : '-'
+                }`}
+              </TableCell>
             </TableRow>
 
             <TableRow>

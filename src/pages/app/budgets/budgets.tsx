@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { getBudgets } from '@/api/get-budgets'
+import { getBudgets } from '@/api/budgets/get-budgets'
 import { Pagination } from '@/components/pagination'
 import {
   Table,
@@ -44,7 +44,7 @@ export function Budgets() {
     <div>
       <Helmet title="Orçamentos" />
       <div className="flex flex-col gap-4 p-10">
-        <h1 className="text-3xl font-bold tracking-tight">Orçamentos</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Custos</h1>
         <div className="space-y-2.5">
           <BudgetsTableFilters />
           <div className="rounded-md border">
@@ -54,6 +54,8 @@ export function Budgets() {
                   <TableHead className="w-[64px]"></TableHead>
                   <TableHead className="w-[264px]">Nome</TableHead>
                   <TableHead>Categoria</TableHead>
+                  <TableHead>Quantidade</TableHead>
+                  <TableHead>Valor Unitario</TableHead>
                   <TableHead className="w-[240px]">Valor</TableHead>
                   <TableHead className="w-[240px]">
                     Data de Vencimento

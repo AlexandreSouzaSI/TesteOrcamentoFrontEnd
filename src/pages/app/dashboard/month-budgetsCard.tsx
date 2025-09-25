@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { NotebookPen } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { getBudgetsValueSum } from '@/api/get-budgetsValueSum'
+import { getBudgetsValueSum } from '@/api/budgets/get-budgetsValueSum'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function MonthBudgetsCard() {

@@ -5,9 +5,8 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { editIncome } from '@/api/income/edit-income'
-import { getCategory } from '@/api/category/get-category'
-import { getIncomeDetails } from '@/api/income/get-income-details'
+import { editCategory } from '@/api/category/edit-category'
+import { getCategoryDetails } from '@/api/category/get-category-details'
 
 import { Button } from './ui/button'
 import {
@@ -20,44 +19,41 @@ import {
 } from './ui/dialog'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select'
+import { getProdutoDetails } from '@/api/product/get-product-details'
+import { editProduct } from '@/api/product/edit-product'
+import { getCategory } from '@/api/category/get-category'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { getCustosDetails } from '@/api/costs/get-costs-details'
+import { editCosts } from '@/api/costs/edit-costs'
 
-const incomeBodyForm = z.object({
-  incomeId: z.string(),
+const costBodyForm = z.object({
+  custoId: z.string(),
   name: z.string().optional(),
-  valor: z.coerce.number().optional(),
-  status: z.string().optional(),
-  data: z.string().optional(),
+  descricao: z.string().optional(),
   categoriaId: z.string().optional(),
 })
 
-type IncomeBodySchema = z.infer<typeof incomeBodyForm>
+type CostBodySchema = z.infer<typeof costBodyForm>
 
-export interface IncomeDetailsProps {
-  incomeId: string
+export interface CostDetailsProps {
+  custoId: string
   open: boolean
   onClose: () => void
 }
 
-export function EditIncomeModal({
-  incomeId,
+export function EditCostModal({
+  custoId,
   open,
   onClose,
-}: IncomeDetailsProps) {
+}: CostDetailsProps) {
   const queryClient = useQueryClient()
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     [],
   )
 
   const { data: result, isLoading } = useQuery({
-    queryKey: ['income', incomeId],
-    queryFn: () => getIncomeDetails({ incomeId }),
+    queryKey: ['costs', custoId],
+    queryFn: () => getCustosDetails({ custoId }),
     enabled: open,
   })
 
@@ -73,68 +69,58 @@ export function EditIncomeModal({
     formState: { isSubmitting },
     control,
     reset,
-  } = useForm<IncomeBodySchema>({
-    resolver: zodResolver(incomeBodyForm),
+  } = useForm<CostBodySchema>({
+    resolver: zodResolver(costBodyForm),
   })
 
-  const { mutateAsync: updateIncomeFn } = useMutation({
-    mutationFn: editIncome,
+  const { mutateAsync: updateCostFn } = useMutation({
+    mutationFn: editCosts,
     onSuccess: async () => {
-      toast.success('Receita atualizada com sucesso')
+      toast.success('Custo atualizado com sucesso')
       onClose()
       await queryClient.invalidateQueries()
     },
     onError: () => {
-      toast.error('Falha ao atualizar a receita. Tente novamente.')
+      toast.error('Falha ao atualizar o custo. Tente novamente.')
     },
   })
 
   useEffect(() => {
     if (result) {
       reset({
-        incomeId: result.id,
+        custoId: result.id,
         name: result.name ?? '',
-        valor: result.valor ?? '',
-        status: result.status ?? '',
-        data: result.data ?? '',
-        categoriaId: result.categoriaId ?? '',
+        descricao: result.descricao ?? '',
+        categoriaId: result.categoria ?? '',
       })
     }
   }, [result, reset])
-
-  useEffect(() => {
-    if (categoryResult) {
-      setCategories(categoryResult.categoria)
-    }
-  }, [categoryResult])
 
   if (isLoading || !result) {
     return null
   }
 
-  async function handleUpdateIncome(data: IncomeBodySchema) {
+  async function handleUpdateCost(data: CostBodySchema) {
     try {
-      await updateIncomeFn({
-        incomeId: data.incomeId,
+      await updateCostFn({
+        custoId: data.custoId,
         name: data.name,
-        valor: data.valor,
-        status: data.status,
-        data: data.data,
-        categoriaId: data.categoriaId,
+        descricao: data.descricao,
+        categoriaId: data.categoriaId
       })
     } catch (error) {
-      toast.error('Falha ao atualizar a receita. Tente novamente.')
+      toast.error('Falha ao atualizar o custo. Tente novamente.')
     }
   }
 
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Editar Receita</DialogTitle>
-        <DialogDescription>Painel para editar uma receita</DialogDescription>
+        <DialogTitle>Editar Custo</DialogTitle>
+        <DialogDescription>Painel para editar um custo</DialogDescription>
       </DialogHeader>
 
-      <form onSubmit={handleSubmit(handleUpdateIncome)}>
+      <form onSubmit={handleSubmit(handleUpdateCost)}>
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right" htmlFor="name">
@@ -142,20 +128,10 @@ export function EditIncomeModal({
             </Label>
             <Input className="col-span-3" id="name" {...register('name')} />
 
-            <Label className="text-right" htmlFor="valor">
-              Valor
+            <Label className="text-right" htmlFor="descricao">
+              Descrição
             </Label>
-            <Input className="col-span-3" id="valor" {...register('valor')} />
-
-            <Label className="text-right" htmlFor="data">
-              Data do Vencimento
-            </Label>
-            <Input
-              type="date"
-              className="col-span-3"
-              id="data"
-              {...register('data')}
-            />
+            <Input className="col-span-3" id="name" {...register('descricao')} />
 
             <Label className="text-right" htmlFor="categoria">
               Categoria
@@ -184,32 +160,6 @@ export function EditIncomeModal({
               )}
             />
 
-            <Label className="text-right" htmlFor="status">
-              Status
-            </Label>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field: { name, onChange, value, disabled } }) => (
-                <Select
-                  defaultValue="pendente"
-                  name={name}
-                  onValueChange={onChange}
-                  value={value}
-                  disabled={disabled}
-                >
-                  <SelectTrigger className="w-[342px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="pago">Pago</SelectItem>
-                    <SelectItem value="vencido">Vencido</SelectItem>
-                    <SelectItem value="hoje">Hoje</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
           </div>
         </div>
 

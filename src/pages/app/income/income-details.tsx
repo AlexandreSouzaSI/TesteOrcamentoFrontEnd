@@ -1,7 +1,7 @@
 import { DialogTitle } from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 
-import { getIncomeDetails } from '@/api/get-income-details'
+import { getIncomeDetails } from '@/api/income/get-income-details'
 import { Status } from '@/components/status'
 import {
   DialogContent,
@@ -28,8 +28,8 @@ export function IncomeDetails({ incomeId, open }: IncomeDetailsProps) {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Renda: {income.id}</DialogTitle>
-        <DialogDescription>Detalhes da renda</DialogDescription>
+        <DialogTitle>Receita: {income.id}</DialogTitle>
+        <DialogDescription>Detalhes da Receita</DialogDescription>
       </DialogHeader>
 
       <div className="space-y-6">

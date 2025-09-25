@@ -1,28 +1,24 @@
 import { api } from '@/lib/axios'
 
+
 export interface GetOrdersQuery {
   pageIndex?: number | null
   name?: string | null
-  status?: string | null
+  categoriaId?: string | null
 }
 
-export interface Despesa {
+interface Custos {
   id: string
   name: string
-  data: Date | null
-  valor: number
-  status: 'vencido' | 'pago' | 'normal' | 'pendente'
-  dataVencimento: string | null
+  descricao?: string
+  categoria: string
   createdAt: Date
   updatedAt: Date | null | undefined
-  userId: string
-  categoriaId: string
-  categoria: string
 }
 
-export interface DespesaResponse {
+export interface CustosResponse {
   value: {
-    despesas: Despesa[]
+    custo: Custos[]
     meta: {
       pageIndex: number
       perPage: number
@@ -32,31 +28,47 @@ export interface DespesaResponse {
   }
 }
 
-export async function getBudgets({ pageIndex, name, status }: GetOrdersQuery) {
+export async function getCosts({ pageIndex, name, categoriaId }: GetOrdersQuery) {
   const token = localStorage.getItem('token')
 
   if (!token) {
     throw new Error('Token not found in localStorage')
   }
 
+  if (pageIndex === undefined) {
+
+    const response = await api.get<CustosResponse>(
+      `/custos`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          name,
+          categoriaId
+        },
+      },
+    )
+
+    return response.data.value
+  }
+
   if (pageIndex === 0) {
     pageIndex = 1
   }
 
-  const response = await api.get<DespesaResponse>(
-    `/despesas?pageIndex=${pageIndex}`,
+  const response = await api.get<CustosResponse>(
+    `/custos?pageIndex=${pageIndex}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
       params: {
         name,
-        status,
+        categoriaId
       },
     },
   )
-
-  console.log('aqui: ', response.data.value)
 
   return response.data.value
 }

@@ -8,6 +8,7 @@ export interface GetCategoriaDetailsResponse {
   categoria: {
     id: string
     name: string
+    produto: string
     createdAt: Date
     updatedAt: Date | null | undefined
   }
