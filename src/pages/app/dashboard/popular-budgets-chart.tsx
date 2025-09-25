@@ -1,26 +1,48 @@
+import { useQuery } from '@tanstack/react-query'
 import { BarChart } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import colors from 'tailwindcss/colors'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-const data = [
-  { budgets: 'Aluguel', revenue: 1000 },
-  { budgets: 'Cartão', revenue: 950 },
-  { budgets: 'Carro', revenue: 1200 },
-  { budgets: 'Viagem', revenue: 1500 },
-  { budgets: 'Agua', revenue: 1500 },
-]
-
-const COLORS = [
-  colors.sky[500],
-  colors.amber[500],
-  colors.violet[500],
-  colors.emerald[500],
-  colors.rose[500],
-]
+import { getBudgets, Despesa } from '@/api/budgets/get-budgets'
 
 export function PopularBudgetsChart() {
+  const { data: budgetsResult, isLoading } = useQuery({
+    queryKey: ['budgets'],
+    queryFn: () => getBudgets({}),
+  })
+
+  if (isLoading || !budgetsResult) {
+    return <Card className="col-span-3 p-4">Carregando dados...</Card>
+  }
+
+  // Agrupa por nome e acumula valores
+  const groupedData: Record<string, number> = {}
+  budgetsResult.despesas.forEach((item: Despesa) => {
+    if (groupedData[item.name]) {
+      groupedData[item.name] += item.valor
+    } else {
+      groupedData[item.name] = item.valor
+    }
+  })
+
+  // Transforma em array para o gráfico
+  const data = Object.entries(groupedData).map(([name, valor]) => ({
+    budgets: name,
+    revenue: valor,
+  }))
+
+  const COLORS = [
+    colors.sky[500],
+    colors.amber[500],
+    colors.violet[500],
+    colors.emerald[500],
+    colors.rose[500],
+    colors.fuchsia[500],
+    colors.lime[500],
+    colors.cyan[500],
+  ]
+
   return (
     <Card className="col-span-3">
       <CardHeader className="pb-8">
@@ -74,15 +96,13 @@ export function PopularBudgetsChart() {
                 )
               }}
             >
-              {data.map((_, index) => {
-                return (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index]}
-                    className="stroke-background hover:opacity-80"
-                  />
-                )
-              })}
+              {data.map((_, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                  className="stroke-background hover:opacity-80"
+                />
+              ))}
             </Pie>
           </PieChart>
         </ResponsiveContainer>
