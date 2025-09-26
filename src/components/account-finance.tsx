@@ -53,12 +53,24 @@ export function AccountFinance() {
             </span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+
           <DialogTrigger asChild>
             <DropdownMenuItem>
               <UserCog className="mr-2 h-4 w-4" />
-              <span>Perfil do usuario</span>
+              <span>Perfil do usuário</span>
             </DropdownMenuItem>
           </DialogTrigger>
+
+          {/* Novo botão para resetar o modal */}
+          <DropdownMenuItem
+            onClick={() => {
+              localStorage.removeItem('hideDashboardIntro')
+              window.location.reload()
+            }}
+          >
+            <span>Reativar guia inicial</span>
+          </DropdownMenuItem>
+
           <DropdownMenuItem
             asChild
             className="text-rose-500 dark:text-rose-400"
@@ -69,6 +81,7 @@ export function AccountFinance() {
             </button>
           </DropdownMenuItem>
         </DropdownMenuContent>
+
       </DropdownMenu>
 
       <StoreProfileDialog />
