@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 
-import { AppLayout } from './pages/_layouts/app'
+import { AppLayout } from './pages/_layouts/appLayouts'
 import { AuthLayout } from './pages/_layouts/auth'
 import { NotFound } from './pages/404'
 import { Budgets } from './pages/app/budgets/budgets'
